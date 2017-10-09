@@ -1,0 +1,23 @@
+<resources>
+    <string name="app_name">OwlExchange</string>
+    <string name="register_activity_title">OwlExchange: Create Account</string>
+    <string name="email_verification_title">OwlExchange: Verify Email</string>
+    <string name="unknown_response">Unexpected onActivityResult response code</string>
+    <string name="unknown_sign_in_response">Unknown response from AuthUI sign-in</string>
+    <string name="sign_in_cancelled">Sign in cancelled</string>
+    <string name="no_internet_connection">No internet connection</string>
+    <string name="unknown_error">An unknown error occurred</string>
+    <string name="title_activity_verification">Settings</string>
+
+    <string name="hint_email">Email</string>
+    <string name="hint_password">Password</string>
+    <string name="loading">Loading…</string>
+    <string name="auth_failed">Authentication failed</string>
+    <string name="account_creation_success">Account created!</string>
+
+    <string name="OK">OK</string>
+    <string name="verification_sent_title">Verification Sent</string>
+    <string name="verification_sent_text">Your account has been created.  Please verify that this is your email address by clicking the link that was just emailed to you.</string>
+    <string name="verification_not_sent_title">Unable to send verification</string>
+    <string name="verification_not_sent_text">Your account was created, but we were unable to send a verification link to this email address.  Please try again.</string>
+</resources>
