@@ -85,7 +85,8 @@ public class StartActivity extends AppCompatActivity {
         if (user != null) {
             // already signed in
             if (user.isEmailVerified()) {
-                startActivity(new Intent(getBaseContext(), MainActivity.class));
+                //startActivity(new Intent(getBaseContext(), MainActivity.class));
+                startActivity(new Intent(getBaseContext(), BasicActivity.class));
                 finish();
             }
             else {
@@ -108,7 +109,8 @@ public class StartActivity extends AppCompatActivity {
                 FirebaseUser user = auth.getCurrentUser();
                 if (user != null) {
                     if (user.isEmailVerified()) {
-                        startActivity(new Intent(getBaseContext(), MainActivity.class));
+                        //startActivity(new Intent(getBaseContext(), MainActivity.class));
+                        startActivity(new Intent(getBaseContext(), BasicActivity.class));
                         finish();
                         return;
                     } else {
