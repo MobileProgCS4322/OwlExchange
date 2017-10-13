@@ -74,7 +74,7 @@ public class StartActivity extends AppCompatActivity {
             }
         });
 
-        auth.signOut();
+        //auth.signOut();
     }
 
     // [START on_start_check_user]

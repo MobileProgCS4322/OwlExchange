@@ -24,8 +24,20 @@ public class BasicActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
+        FloatingActionButton fabMessaging = (FloatingActionButton) findViewById(R.id.fabMessaging);
+        FloatingActionButton fabAdd = (FloatingActionButton) findViewById(R.id.fabAdd);
+        FloatingActionButton fabHome = (FloatingActionButton) findViewById(R.id.fabHome);
+        FloatingActionButton fabSearch = (FloatingActionButton) findViewById(R.id.fabSearch);
+
+        fabAdd.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent i = new Intent(getBaseContext(), PostNewItemActivity.class);
+                startActivity(i);
+            }
+        });
+
+        fabMessaging.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
