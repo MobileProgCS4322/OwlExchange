@@ -43,7 +43,7 @@ public class RegisterActivity extends AppCompatActivity {
     private EditText mPasswordField;
     private EditText mUsername;
     private Button registerButton;
-    private Button testingButton;
+    //private Button testingButton;
 
     private CoordinatorLayout messageBarLayout;
 
@@ -81,6 +81,7 @@ public class RegisterActivity extends AppCompatActivity {
             }
         });
 
+/*
         testingButton = findViewById(R.id.testButton);
         testingButton.setOnClickListener(new Button.OnClickListener() {
             @Override
@@ -125,6 +126,7 @@ public class RegisterActivity extends AppCompatActivity {
 
             }
         });
+*/
 
     }
 

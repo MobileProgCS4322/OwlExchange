@@ -4,6 +4,105 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="cs4322si.myapplication.PostNewItemActivity">
+    tools:context="cs4322si.myapplication.PostNewItemActivity"
+    tools:layout_editor_absoluteY="25dp"
+    tools:layout_editor_absoluteX="0dp">
+
+    <EditText
+        android:id="@+id/mItemTitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="Title"
+        android:inputType="textShortMessage"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        tools:layout_constraintTop_creator="1"
+        tools:layout_constraintRight_creator="1"
+        android:layout_marginStart="70dp"
+        android:layout_marginEnd="70dp"
+        android:layout_marginTop="16dp"
+        tools:layout_constraintLeft_creator="1"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginLeft="70dp"
+        android:layout_marginRight="70dp" />
+
+
+    <EditText
+        android:id="@+id/mDescription"
+        android:layout_width="0dp"
+        android:layout_height="101dp"
+        android:ems="10"
+        android:hint="Additional Description"
+        android:inputType="textLongMessage"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        tools:layout_constraintTop_creator="1"
+        tools:layout_constraintRight_creator="1"
+        android:layout_marginStart="71dp"
+        android:layout_marginEnd="71dp"
+        android:layout_marginTop="52dp"
+        app:layout_constraintTop_toBottomOf="@+id/mItemTitle"
+        tools:layout_constraintLeft_creator="1"
+        android:layout_marginLeft="71dp"
+        android:layout_marginRight="71dp" />
+
+    <Spinner
+        android:id="@+id/mCategory"
+        android:layout_width="193dp"
+        android:layout_height="29dp"
+        android:layout_marginBottom="11dp"
+        android:layout_marginTop="12dp"
+        app:layout_constraintBottom_toTopOf="@+id/mDescription"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/mItemTitle"
+        tools:layout_constraintBottom_creator="1"
+        tools:layout_constraintLeft_creator="1"
+        tools:layout_constraintRight_creator="1"
+        tools:layout_constraintTop_creator="1" />
+
+    <ImageView
+        android:id="@+id/mPicture"
+        android:layout_width="192dp"
+        android:layout_height="0dp"
+        app:srcCompat="?attr/colorButtonNormal"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        tools:layout_constraintTop_creator="1"
+        tools:layout_constraintRight_creator="1"
+        tools:layout_constraintBottom_creator="1"
+        app:layout_constraintBottom_toTopOf="@+id/btnPost"
+        android:layout_marginTop="10dp"
+        app:layout_constraintTop_toBottomOf="@+id/mDescription"
+        tools:layout_constraintLeft_creator="1"
+        android:layout_marginBottom="17dp" />
+
+    <Button
+        android:id="@+id/btnTakePicture"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Take Picture"
+        android:textSize="14sp"
+        android:theme="@style/ThemeOverlay.MyDarkButton"
+        app:layout_constraintRight_toLeftOf="@+id/btnPost"
+        app:layout_constraintLeft_toLeftOf="parent"
+        tools:layout_constraintTop_creator="1"
+        android:layout_marginTop="18dp"
+        app:layout_constraintTop_toBottomOf="@+id/mPicture" />
+
+    <Button
+        android:id="@+id/btnPost"
+        android:layout_width="107dp"
+        android:layout_height="48dp"
+        android:text="Post Item"
+        android:textSize="14sp"
+        android:theme="@style/ThemeOverlay.MyDarkButton"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintLeft_toRightOf="@+id/btnTakePicture"
+        tools:layout_constraintBottom_creator="1"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginBottom="87dp" />
+
 
 </android.support.constraint.ConstraintLayout>

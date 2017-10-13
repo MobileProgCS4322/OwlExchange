@@ -98,4 +98,18 @@
 
     <string name="pref_title_vibrate">Vibrate</string>
 
+    <string-array name="owlCategories">
+        <item>Select Category</item>
+        <item>Books</item>
+        <item>Tech</item>
+        <item>Food</item>
+        <item>Services</item>
+        <item>Transportation</item>
+        <item>Clothes</item>
+        <item>Home</item>
+        <item>Entertainment</item>
+        <item>Other</item>
+    </string-array>
+
+
 </resources>
