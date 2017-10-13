@@ -1,26 +1,33 @@
 package cs4322si.myapplication;
 
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class PostNewItemActivity extends AppCompatActivity {
 
+    private Button btnCamera, btnPost;
     private Spinner mCategory;
-    Button btnCamera, btnPost;
+    private EditText mItemTitle, mDescription;
+    private ImageView mPicture;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_post_new_item);
 
-        mCategory = (Spinner) findViewById(R.id.mCategory);
+        mCategory = findViewById(R.id.mCategory);
 
 /*        ArrayAdapter<String> myAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item) {
             @Override
@@ -53,7 +60,70 @@ public class PostNewItemActivity extends AppCompatActivity {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         mCategory.setAdapter(adapter);
 
+        mItemTitle = findViewById(R.id.mItemTitle);
+        mDescription = findViewById(R.id.mDescription);
+        mPicture = findViewById(R.id.mPicture);
+
         btnCamera = (Button)findViewById(R.id.btnTakePicture);
         btnPost = (Button)findViewById(R.id.btnPost);
+
+        btnCamera.setOnClickListener(new Button.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
+
+        btnPost.setOnClickListener(new Button.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                submitPost();
+            }
+        });
+
+    }
+
+    private void submitPost() {
+
+        boolean valid = true;
+        Bitmap picture;
+
+        String title = mItemTitle.getText().toString();
+        if (TextUtils.isEmpty(title)) {
+            mItemTitle.setError("Required.");
+            valid = false;
+        }
+        else {
+            mItemTitle.setError(null);
+        }
+
+        String description = mDescription.getText().toString();
+
+        int catNumber = mCategory.getSelectedItemPosition();
+        if (catNumber ==  0) {
+            Toast.makeText(this, "Please select a category.", Toast.LENGTH_SHORT).show();
+            valid = false;
+        }
+        else {
+            String category = mCategory.getSelectedItem().toString();
+        }
+
+/*
+
+        if (mPicture.getDrawable() == null) {
+            Toast.makeText(this, "Picture required.", Toast.LENGTH_SHORT).show();
+            valid = false;
+        }
+        else {
+            //picture = mPicture.get
+        }
+
+*/
+
+        if (valid) {
+
+
+        }
+
     }
 }
