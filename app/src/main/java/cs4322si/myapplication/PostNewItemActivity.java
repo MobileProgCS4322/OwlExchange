@@ -42,6 +42,7 @@ import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 public class PostNewItemActivity extends AppCompatActivity {
@@ -229,10 +230,10 @@ public class PostNewItemActivity extends AppCompatActivity {
 
                 DatabaseReference newDatabaseReference = mDatabase.child("items").push();
                 //String key = mDatabase.child("items").push().getKey();
-                String key = newDatabaseReference.getKey();
+                String itemKey = newDatabaseReference.getKey();
 
                 //create the storagepath for the imagefile in Firebase Storage
-                StorageReference storageRef = storage.getReference().child("images").child(owner).child(key);
+                StorageReference storageRef = storage.getReference().child("images").child(owner).child(itemKey);
                 String imageLoc = storageRef.toString();
 
                 // Get the data from an ImageView as bytes
@@ -261,9 +262,10 @@ public class PostNewItemActivity extends AppCompatActivity {
                 
 
                 
-                Owlitem newItem = new Owlitem(owner, description, category, currDate, imageLoc);
+                Owlitem newItem = new Owlitem(owner, title, description, category, currDate, imageLoc);
                 //Map<String, Object> itemValues = newItem.toMap();
-
+                //Map<String, Object> childUpdates = new HashMap<>();
+                //childUpdates.put("/items/"+key, childUpdates);
 
                 //mDatabase.child("items").push().setValue(newItem);
                 newDatabaseReference.setValue(newItem, new DatabaseReference.CompletionListener() {
@@ -277,6 +279,16 @@ public class PostNewItemActivity extends AppCompatActivity {
                         }
                     }
                 });
+                //also add the item to the user's items list
+                mDatabase.child("users").child(owner).child("myItems").child(itemKey).setValue(true);
+
+                //Map<String, Object> ownerItem = new HashMap<>();
+                //ownerItem.put(itemKey, true);
+                //Map<String, Object> childUpdates = new HashMap<>();
+                //childUpdates.put("/users/" + owner + "/myItems/", ownerItem);
+                //mDatabase.updateChildren(childUpdates);
+
+
 
             }
         }

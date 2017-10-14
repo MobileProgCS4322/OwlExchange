@@ -20,6 +20,7 @@ public class Owlitem {
 
 
     public String owner;  //who posted it
+    public String title;
     public String description;
     public String category;
     public long datePosted;
@@ -29,7 +30,8 @@ public class Owlitem {
 
     public Owlitem() {}
 
-    public Owlitem(String owner, String description, String category, long datePosted, String imageLoc) {
+    public Owlitem(String owner, String title, String description, String category, long datePosted, String imageLoc) {
+        this.title = title;
         this.owner = owner;
         this.description = description;
         this.category = category;
@@ -37,11 +39,12 @@ public class Owlitem {
         this.imageLoc = imageLoc;
     }
 
-/*
+
     @Exclude
     public Map<String, Object> toMap() {
         HashMap<String, Object> result = new HashMap<>();
         result.put("owner", owner);
+        result.put("title", title);
         result.put("description", description);
         result.put("category", category);
         result.put("datePosted", datePosted);
@@ -49,8 +52,6 @@ public class Owlitem {
         result.put("traded", traded);
 
         return result;
-    }    
-*/
-
+    }
 
 }
