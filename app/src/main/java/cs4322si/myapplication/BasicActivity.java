@@ -5,17 +5,44 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.firebase.ui.database.FirebaseRecyclerAdapter;
+import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
 
 public class BasicActivity extends AppCompatActivity {
+
+    //private FirebaseAuth auth;
+    private DatabaseReference mDatabase;
+    //private FirebaseStorage storage;
+
+    private TextView mEmptyListMessage;
+
+    private RecyclerView mRecyclerView;
+
+    private static final Query query = FirebaseDatabase.getInstance().getReference().child("items").limitToLast(25);
+
+    private static final String TAG = "MainPage";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,6 +50,30 @@ public class BasicActivity extends AppCompatActivity {
         setContentView(R.layout.activity_basic);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        mEmptyListMessage = findViewById(R.id.emptyTextView);
+
+
+        mDatabase = FirebaseDatabase.getInstance().getReference();
+        //auth = FirebaseAuth.getInstance();
+        //storage = FirebaseStorage.getInstance();
+
+        mRecyclerView = findViewById(R.id.itemsRecycler);
+
+        //final RecyclerView.Adapter adapter = newAdapter();
+
+        // Scroll to bottom on new messages
+        //adapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
+        //    @Override
+        //    public void onItemRangeInserted(int positionStart, int itemCount) {
+        //        mRecyclerView.smoothScrollToPosition(adapter.getItemCount());
+        //    }
+        //});
+
+        mRecyclerView.setHasFixedSize(true);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+
 
         FloatingActionButton fabMessaging = (FloatingActionButton) findViewById(R.id.fabMessaging);
         FloatingActionButton fabAdd = (FloatingActionButton) findViewById(R.id.fabAdd);
@@ -45,14 +96,113 @@ public class BasicActivity extends AppCompatActivity {
             }
         });
 
-        //FirebaseAuth auth = FirebaseAuth.getInstance();
-        //FirebaseUser user = auth.getCurrentUser();
+    }
 
-/*        if (user != null) {
-            welcomeTextView = (TextView) findViewById(R.id.welcomeTextView);
-            welcomeTextView.setText(
-                    TextUtils.isEmpty(user.getEmail()) ? "No email" : user.getEmail());
-        }        */
+    @Override
+    public void onStart() {
+        super.onStart();
+        if (isSignedIn()) {
+            attachRecyclerViewAdapter();
+        }
+        //FirebaseAuth.getInstance().addAuthStateListener(this);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        //FirebaseAuth.getInstance().removeAuthStateListener(this);
+    }
+
+
+
+    private void attachRecyclerViewAdapter() {
+        RecyclerView.Adapter adapter = newAdapter();
+
+        // Scroll to bottom on new messages
+        //adapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
+        //    @Override
+        //    public void onItemRangeInserted(int positionStart, int itemCount) {
+        //        mRecyclerView.smoothScrollToPosition(adapter.getItemCount());
+        //    }
+        //});
+
+        mRecyclerView.setAdapter(adapter);
+    }
+
+    protected RecyclerView.Adapter newAdapter() {
+
+/*
+        //code to check if query/recycler was being loaded with items
+        ValueEventListener itemListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                // Get Post object and use the values to update the UI
+                //Owlitem item = dataSnapshot.getValue(Owlitem.class);
+                // ...
+                String numItems = String.valueOf(dataSnapshot.getChildrenCount());
+                Toast.makeText(BasicActivity.this, numItems, Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                // Getting Post failed, log a message
+                Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
+                // ...
+            }
+        };
+        query.addValueEventListener(itemListener);
+
+*/
+
+        //Query query = mDatabase.child("items").limitToLast(25);
+
+        FirebaseRecyclerOptions<Owlitem> options =
+                new FirebaseRecyclerOptions.Builder<Owlitem>()
+                        .setQuery(query, Owlitem.class)
+                        .setLifecycleOwner(this)
+                        .build();
+
+
+        return new FirebaseRecyclerAdapter<Owlitem, OwlitemHolder>(options) {
+            @Override
+            public OwlitemHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+                // Create a new instance of the ViewHolder, in this case we are using a custom
+                // layout called R.layout.message for each item
+                View view = LayoutInflater.from(parent.getContext())
+                        .inflate(R.layout.itemlayout, parent, false);
+
+                return new OwlitemHolder(view);
+            }
+
+            @Override
+            protected void onBindViewHolder(OwlitemHolder holder, int position, Owlitem model) {
+                // Bind the Owlitem object to the holder
+                holder.bind(model);
+            }
+
+            @Override
+            public void onDataChanged() {
+                // If there are no items, show a view that invites the user to add an item.
+                mEmptyListMessage.setVisibility(getItemCount() == 0 ? View.VISIBLE : View.GONE);
+            }
+
+/*
+
+            @Override
+            public void onError(DatabaseError e) {
+                // Called when there is an error getting data. You may want to update
+                // your UI to display an error message to the user.
+                // ...
+            }
+*/
+
+        };
+    }
+
+
+
+    private boolean isSignedIn() {
+        return FirebaseAuth.getInstance().getCurrentUser() != null;
     }
 
     @Override

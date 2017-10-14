@@ -27,9 +27,11 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -199,7 +201,7 @@ public class PostNewItemActivity extends AppCompatActivity {
         boolean valid = true;
         Bitmap picture;
 
-        String title = mItemTitle.getText().toString();
+        final String title = mItemTitle.getText().toString();
         if (TextUtils.isEmpty(title)) {
             mItemTitle.setError("Required.");
             valid = false;
@@ -223,71 +225,91 @@ public class PostNewItemActivity extends AppCompatActivity {
         if (valid) {
             FirebaseUser user = auth.getCurrentUser();
             if (user != null) {
-                String owner = user.getUid();
-                String description = mDescription.getText().toString();
-                long currDate = System.currentTimeMillis();     //use mDate = Date(currDate) to get it back.
-                String category = mCategory.getSelectedItem().toString();
+                final String ownerKey = user.getUid();
 
-                DatabaseReference newDatabaseReference = mDatabase.child("items").push();
-                //String key = mDatabase.child("items").push().getKey();
-                String itemKey = newDatabaseReference.getKey();
+                //nested code below because we want to store the username with the item as well - so we don't have to retrieve it later
 
-                //create the storagepath for the imagefile in Firebase Storage
-                StorageReference storageRef = storage.getReference().child("images").child(owner).child(itemKey);
-                String imageLoc = storageRef.toString();
-
-                // Get the data from an ImageView as bytes
-                mPicture.setDrawingCacheEnabled(true);
-                mPicture.buildDrawingCache();
-                Bitmap bitmap = mPicture.getDrawingCache();
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-                byte[] data = baos.toByteArray();
-
-                UploadTask uploadTask = storageRef.putBytes(data);
-                uploadTask.addOnFailureListener(new OnFailureListener() {
+                String username = null;
+                ValueEventListener userListener = new ValueEventListener() {
                     @Override
-                    public void onFailure(@NonNull Exception exception) {
-                        // Handle unsuccessful uploads
-                        //Toast.makeText(PostNewItemActivity.this, "Picture NOT saved!", Toast.LENGTH_LONG).show();
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        Owluser currUser = dataSnapshot.getValue(Owluser.class);
+                        String username = currUser.username;
+
+                        String description = mDescription.getText().toString();
+                        long currDate = System.currentTimeMillis();     //use mDate = Date(currDate) to get it back.
+                        String category = mCategory.getSelectedItem().toString();
+
+                        DatabaseReference newDatabaseReference = mDatabase.child("items").push();
+                        //String key = mDatabase.child("items").push().getKey();
+                        String itemKey = newDatabaseReference.getKey();
+
+                        //create the storagepath for the imagefile in Firebase Storage
+                        StorageReference storageRef = storage.getReference().child("images").child(ownerKey).child(itemKey);
+                        String imageLoc = storageRef.toString();
+
+                        // Get the data from an ImageView as bytes
+                        mPicture.setDrawingCacheEnabled(true);
+                        mPicture.buildDrawingCache();
+                        Bitmap bitmap = mPicture.getDrawingCache();
+                        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+                        byte[] data = baos.toByteArray();
+
+                        UploadTask uploadTask = storageRef.putBytes(data);
+                        uploadTask.addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception exception) {
+                                // Handle unsuccessful uploads
+                                //Toast.makeText(PostNewItemActivity.this, "Picture NOT saved!", Toast.LENGTH_LONG).show();
+                            }
+                        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                            @Override
+                            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                                // taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
+                                //Uri downloadUrl = taskSnapshot.getDownloadUrl();
+                                //Toast.makeText(PostNewItemActivity.this, "Picture saved!", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+
+                        Owlitem newItem = new Owlitem(username, ownerKey, title, description, category, currDate, imageLoc);
+                        //Map<String, Object> itemValues = newItem.toMap();
+                        //Map<String, Object> childUpdates = new HashMap<>();
+                        //childUpdates.put("/items/"+key, childUpdates);
+
+                        //mDatabase.child("items").push().setValue(newItem);
+                        newDatabaseReference.setValue(newItem, new DatabaseReference.CompletionListener() {
+                            @Override
+                            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                                if (databaseError != null) {
+                                    Log.e("ERROR", "Data could not be saved " + databaseError.getMessage());
+                                } else {
+                                    //Log.e("SUCCESS", "Data saved successfully.");
+                                    Toast.makeText(PostNewItemActivity.this, "Item posted!", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        });
+                        //also add the item to the user's items list
+                        mDatabase.child("users").child(ownerKey).child("myItems").child(itemKey).setValue(true);
+
+                        //Map<String, Object> ownerItem = new HashMap<>();
+                        //ownerItem.put(itemKey, true);
+                        //Map<String, Object> childUpdates = new HashMap<>();
+                        //childUpdates.put("/users/" + owner + "/myItems/", ownerItem);
+                        //mDatabase.updateChildren(childUpdates);
+
+                        finish();
                     }
-                }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+
                     @Override
-                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                        // taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
-                        //Uri downloadUrl = taskSnapshot.getDownloadUrl();
-                        //Toast.makeText(PostNewItemActivity.this, "Picture saved!", Toast.LENGTH_SHORT).show();
+                    public void onCancelled(DatabaseError databaseError) {
+                        // Getting user failed, log a message
+                        Log.w(TAG, "getUsername:onCancelled", databaseError.toException());
+                        // ...
                     }
-                });                
-                
+                };
 
-                
-                Owlitem newItem = new Owlitem(owner, title, description, category, currDate, imageLoc);
-                //Map<String, Object> itemValues = newItem.toMap();
-                //Map<String, Object> childUpdates = new HashMap<>();
-                //childUpdates.put("/items/"+key, childUpdates);
-
-                //mDatabase.child("items").push().setValue(newItem);
-                newDatabaseReference.setValue(newItem, new DatabaseReference.CompletionListener() {
-                    @Override
-                    public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                        if (databaseError != null) {
-                            Log.e("ERROR", "Data could not be saved " + databaseError.getMessage());
-                        } else {
-                            //Log.e("SUCCESS", "Data saved successfully.");
-                            Toast.makeText(PostNewItemActivity.this, "Item posted!", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
-                //also add the item to the user's items list
-                mDatabase.child("users").child(owner).child("myItems").child(itemKey).setValue(true);
-
-                //Map<String, Object> ownerItem = new HashMap<>();
-                //ownerItem.put(itemKey, true);
-                //Map<String, Object> childUpdates = new HashMap<>();
-                //childUpdates.put("/users/" + owner + "/myItems/", ownerItem);
-                //mDatabase.updateChildren(childUpdates);
-
+                mDatabase.child("users").child(ownerKey).addListenerForSingleValueEvent(userListener);
 
 
             }

@@ -19,20 +19,24 @@ public class Owlitem {
     static public final int catOther = 8;*/
 
 
-    public String owner;  //who posted it
+    public String username;  //username of who posted it
+    public String ownerKey;
+
     public String title;
     public String description;
     public String category;
     public long datePosted;
+    //public Date mTimeStamp;
     public String imageLoc; //address of image in firebase storage.
 
     public boolean traded = false;  //sold yet?
 
     public Owlitem() {}
 
-    public Owlitem(String owner, String title, String description, String category, long datePosted, String imageLoc) {
+    public Owlitem(String username, String ownerKey, String title, String description, String category, long datePosted, String imageLoc) {
         this.title = title;
-        this.owner = owner;
+        this.username = username;
+        this.ownerKey = ownerKey;
         this.description = description;
         this.category = category;
         this.datePosted = datePosted;
@@ -43,7 +47,8 @@ public class Owlitem {
     @Exclude
     public Map<String, Object> toMap() {
         HashMap<String, Object> result = new HashMap<>();
-        result.put("owner", owner);
+        result.put("username", username);
+        result.put("ownerKey", ownerKey);
         result.put("title", title);
         result.put("description", description);
         result.put("category", category);

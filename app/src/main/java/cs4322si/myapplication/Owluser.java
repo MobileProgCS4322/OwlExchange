@@ -2,9 +2,13 @@ package cs4322si.myapplication;
 
 //this class not really used yet - placeholder
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class Owluser {
 
-    private String username;
+    public String username;
+    public Map<String, Boolean> myItems = new HashMap<>();
 
     //private String firstname;
     //private String lastname;
@@ -15,14 +19,6 @@ public class Owluser {
     }
 
     public Owluser(String username) {
-        this.username = username;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
         this.username = username;
     }
 
