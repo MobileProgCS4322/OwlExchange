@@ -14,10 +14,18 @@ public class Owlitem {
     static public final int catOther = 8;*/
 
 
-    private String owner;  //who posted it
-    private String description;
-    private String category;
-    private String datePosted;
-    private boolean traded = false;  //sold yet?
+    public String owner;  //who posted it
+    public String description;
+    public String category;
+    public long datePosted;
+    public boolean traded = false;  //sold yet?
 
+    public Owlitem() {}
+
+    public Owlitem(String owner, String description, String category, long datePosted) {
+        this.owner = owner;
+        this.description = description;
+        this.category = category;
+        this.datePosted = datePosted;
+    }
 }

@@ -45,8 +45,8 @@ public class BasicActivity extends AppCompatActivity {
             }
         });
 
-        FirebaseAuth auth = FirebaseAuth.getInstance();
-        FirebaseUser user = auth.getCurrentUser();
+        //FirebaseAuth auth = FirebaseAuth.getInstance();
+        //FirebaseUser user = auth.getCurrentUser();
 
 /*        if (user != null) {
             welcomeTextView = (TextView) findViewById(R.id.welcomeTextView);
