@@ -39,16 +39,18 @@ public class BasicActivity extends AppCompatActivity {
     private TextView mEmptyListMessage;
 
     private RecyclerView mRecyclerView;
+    private FirebaseRecyclerAdapter  adapter;
 
     private static final Query query = FirebaseDatabase.getInstance().getReference().child("items").limitToLast(25);
 
     private static final String TAG = "MainPage";
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_basic);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         mEmptyListMessage = findViewById(R.id.emptyTextView);
@@ -71,9 +73,10 @@ public class BasicActivity extends AppCompatActivity {
         //});
 
         mRecyclerView.setHasFixedSize(true);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-
-
+        LinearLayoutManager myLayoutMgr = new LinearLayoutManager(this);
+        myLayoutMgr.setReverseLayout(true);
+        myLayoutMgr.setStackFromEnd(true);
+        mRecyclerView.setLayoutManager(myLayoutMgr);
 
         FloatingActionButton fabMessaging = (FloatingActionButton) findViewById(R.id.fabMessaging);
         FloatingActionButton fabAdd = (FloatingActionButton) findViewById(R.id.fabAdd);
@@ -96,6 +99,21 @@ public class BasicActivity extends AppCompatActivity {
             }
         });
 
+        fabHome.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //if (adapter != null) {
+
+                //mFirebaseRecyclerViewAdapter.cleanup()
+
+                attachRecyclerViewAdapter();
+                adapter.notifyDataSetChanged();
+                mRecyclerView.smoothScrollToPosition(0);
+            }
+        });
+
+
+
     }
 
     @Override
@@ -116,7 +134,8 @@ public class BasicActivity extends AppCompatActivity {
 
 
     private void attachRecyclerViewAdapter() {
-        RecyclerView.Adapter adapter = newAdapter();
+        //RecyclerView.Adapter adapter = newAdapter();
+        adapter = newAdapter();
 
         // Scroll to bottom on new messages
         //adapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
@@ -129,7 +148,7 @@ public class BasicActivity extends AppCompatActivity {
         mRecyclerView.setAdapter(adapter);
     }
 
-    protected RecyclerView.Adapter newAdapter() {
+    protected FirebaseRecyclerAdapter newAdapter() {
 
 /*
         //code to check if query/recycler was being loaded with items
