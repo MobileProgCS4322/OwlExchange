@@ -1,9 +1,18 @@
 package cs4322si.myapplication;
 
+import android.content.Context;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.bumptech.glide.Glide;
+import com.firebase.ui.storage.images.FirebaseImageLoader;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 public class OwlitemHolder extends RecyclerView.ViewHolder {
 
@@ -32,11 +41,31 @@ public class OwlitemHolder extends RecyclerView.ViewHolder {
         //mGray300 = ContextCompat.getColor(itemView.getContext(), R.color.material_gray_300);
     }
 
-    public void bind(Owlitem item) {
+    public void bind(Owlitem item, FirebaseStorage storage, Context context) {
         mTitle.setText(item.title);
         mCategory.setText(item.category);
         mPoster.setText(item.username);
 
+        StorageReference gsReference = storage.getReferenceFromUrl(item.imageLoc);
+        Glide.with(context)
+                .using(new FirebaseImageLoader())
+                .load(gsReference)
+                .into(mPicture);
+
+/*        final long ONE_MEGABYTE = 1024 * 1024;
+        gsReference.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+            @Override
+            public void onSuccess(byte[] bytes) {
+                // Data for "images/island.jpg" is returns, use this as needed
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception exception) {
+                // Handle any errors
+            }
+        });     */
+        
+        
         //FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         //setIsSender(currentUser != null && chat.getUid().equals(currentUser.getUid()));
     }

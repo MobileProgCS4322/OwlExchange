@@ -34,7 +34,7 @@ public class BasicActivity extends AppCompatActivity {
 
     //private FirebaseAuth auth;
     private DatabaseReference mDatabase;
-    //private FirebaseStorage storage;
+    private FirebaseStorage storage;
 
     private TextView mEmptyListMessage;
 
@@ -120,6 +120,7 @@ public class BasicActivity extends AppCompatActivity {
     public void onStart() {
         super.onStart();
         if (isSignedIn()) {
+            storage = FirebaseStorage.getInstance();
             attachRecyclerViewAdapter();
         }
         //FirebaseAuth.getInstance().addAuthStateListener(this);
@@ -196,7 +197,7 @@ public class BasicActivity extends AppCompatActivity {
             @Override
             protected void onBindViewHolder(OwlitemHolder holder, int position, Owlitem model) {
                 // Bind the Owlitem object to the holder
-                holder.bind(model);
+                holder.bind(model, storage, getBaseContext());
             }
 
             @Override
