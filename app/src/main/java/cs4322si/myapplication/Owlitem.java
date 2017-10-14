@@ -1,5 +1,10 @@
 package cs4322si.myapplication;
 
+import com.google.firebase.database.Exclude;
+
+import java.util.HashMap;
+import java.util.Map;
+
 public class Owlitem {
 
 /*    static public final String [] categories = {"Books", "Tech", "Food", "Services", "Transportation", "Clothes", "Home", "Entertainment", "Other"};
@@ -18,14 +23,34 @@ public class Owlitem {
     public String description;
     public String category;
     public long datePosted;
+    public String imageLoc; //address of image in firebase storage.
+
     public boolean traded = false;  //sold yet?
 
     public Owlitem() {}
 
-    public Owlitem(String owner, String description, String category, long datePosted) {
+    public Owlitem(String owner, String description, String category, long datePosted, String imageLoc) {
         this.owner = owner;
         this.description = description;
         this.category = category;
         this.datePosted = datePosted;
+        this.imageLoc = imageLoc;
     }
+
+/*
+    @Exclude
+    public Map<String, Object> toMap() {
+        HashMap<String, Object> result = new HashMap<>();
+        result.put("owner", owner);
+        result.put("description", description);
+        result.put("category", category);
+        result.put("datePosted", datePosted);
+        result.put("imageLoc", imageLoc);
+        result.put("traded", traded);
+
+        return result;
+    }    
+*/
+
+
 }

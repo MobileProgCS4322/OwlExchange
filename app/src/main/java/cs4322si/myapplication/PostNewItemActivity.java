@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -22,12 +23,18 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -35,6 +42,7 @@ import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Map;
 
 public class PostNewItemActivity extends AppCompatActivity {
 
@@ -45,6 +53,7 @@ public class PostNewItemActivity extends AppCompatActivity {
 
     private FirebaseAuth auth;
     private DatabaseReference mDatabase;
+    private FirebaseStorage storage;
 
     String mCurrentPhotoPath;       //filepath saved here
 
@@ -59,8 +68,8 @@ public class PostNewItemActivity extends AppCompatActivity {
         setContentView(R.layout.activity_post_new_item);
 
         mDatabase = FirebaseDatabase.getInstance().getReference();
-
         auth = FirebaseAuth.getInstance();
+        storage = FirebaseStorage.getInstance();
 
         mCategory = findViewById(R.id.mCategory);
 
@@ -218,9 +227,46 @@ public class PostNewItemActivity extends AppCompatActivity {
                 long currDate = System.currentTimeMillis();     //use mDate = Date(currDate) to get it back.
                 String category = mCategory.getSelectedItem().toString();
 
-                Owlitem newItem = new Owlitem(owner, description, category, currDate);
+                DatabaseReference newDatabaseReference = mDatabase.child("items").push();
+                //String key = mDatabase.child("items").push().getKey();
+                String key = newDatabaseReference.getKey();
+
+                //create the storagepath for the imagefile in Firebase Storage
+                StorageReference storageRef = storage.getReference().child("images").child(owner).child(key);
+                String imageLoc = storageRef.toString();
+
+                // Get the data from an ImageView as bytes
+                mPicture.setDrawingCacheEnabled(true);
+                mPicture.buildDrawingCache();
+                Bitmap bitmap = mPicture.getDrawingCache();
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+                byte[] data = baos.toByteArray();
+
+                UploadTask uploadTask = storageRef.putBytes(data);
+                uploadTask.addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception exception) {
+                        // Handle unsuccessful uploads
+                        //Toast.makeText(PostNewItemActivity.this, "Picture NOT saved!", Toast.LENGTH_LONG).show();
+                    }
+                }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                        // taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
+                        //Uri downloadUrl = taskSnapshot.getDownloadUrl();
+                        //Toast.makeText(PostNewItemActivity.this, "Picture saved!", Toast.LENGTH_SHORT).show();
+                    }
+                });                
+                
+
+                
+                Owlitem newItem = new Owlitem(owner, description, category, currDate, imageLoc);
+                //Map<String, Object> itemValues = newItem.toMap();
+
+
                 //mDatabase.child("items").push().setValue(newItem);
-                mDatabase.child("items").push().setValue(newItem, new DatabaseReference.CompletionListener() {
+                newDatabaseReference.setValue(newItem, new DatabaseReference.CompletionListener() {
                     @Override
                     public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
                         if (databaseError != null) {
