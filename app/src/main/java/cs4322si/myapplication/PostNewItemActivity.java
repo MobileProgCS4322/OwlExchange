@@ -1,7 +1,13 @@
 package cs4322si.myapplication;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.net.Uri;
+import android.os.Environment;
+import android.provider.MediaStore;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -22,6 +28,10 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -36,7 +46,12 @@ public class PostNewItemActivity extends AppCompatActivity {
     private FirebaseAuth auth;
     private DatabaseReference mDatabase;
 
+    String mCurrentPhotoPath;       //filepath saved here
+
     private static final String TAG = "PostNewItem";
+
+    private static final int REQUEST_IMAGE_CAPTURE = 456;
+    private static final int REQUEST_IMAGE_FILESAVE = 789;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,7 +105,7 @@ public class PostNewItemActivity extends AppCompatActivity {
         btnCamera.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                dispatchTakePictureIntent();
             }
         });
 
@@ -102,6 +117,72 @@ public class PostNewItemActivity extends AppCompatActivity {
         });
 
     }
+
+    private void dispatchTakePictureIntent2() {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+            startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+        }
+    }
+
+    private void dispatchTakePictureIntent() {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        // Ensure that there's a camera activity to handle the intent
+        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+            // Create the File where the photo should go
+            File photoFile = null;
+            try {
+                photoFile = createImageFile();
+            } catch (IOException ex) {
+                // Error occurred while creating the File
+                //...
+            }
+            // Continue only if the File was successfully created
+            if (photoFile != null) {
+                Uri photoURI = FileProvider.getUriForFile(this, "cs4322si.myapplication.fileprovider", photoFile);
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                startActivityForResult(takePictureIntent, REQUEST_IMAGE_FILESAVE);
+            }
+        }
+    }
+
+    private File createImageFile() throws IOException {
+        // Create an image file name
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File image = File.createTempFile(
+                imageFileName, /* prefix */
+                ".jpg",/* suffix */
+                storageDir/* directory */
+        );
+
+        // Save a file: path for use with ACTION_VIEW intents
+        mCurrentPhotoPath = image.getAbsolutePath();
+        return image;
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode == RESULT_OK) {
+           if (requestCode == REQUEST_IMAGE_FILESAVE) {
+                File imgFile = new File(mCurrentPhotoPath);
+                if (imgFile.exists()) {
+                    Bitmap myBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
+                    mPicture.setImageBitmap(myBitmap);
+                }
+
+            }
+            else if (requestCode == REQUEST_IMAGE_CAPTURE) {
+                Bundle extras = data.getExtras();
+                Bitmap imageBitmap = (Bitmap) extras.get("data");
+                mPicture.setImageBitmap(imageBitmap);
+                Toast.makeText(PostNewItemActivity.this, "took a picture...", Toast.LENGTH_LONG).show();
+            }
+        }
+    }
+
+
 
     private void submitPost() {
 
@@ -121,19 +202,13 @@ public class PostNewItemActivity extends AppCompatActivity {
                 Toast.makeText(this, "Please select a category.", Toast.LENGTH_SHORT).show();
                 valid = false;
             }
+            else {
+                if (mPicture.getDrawable() == null) {
+                    Toast.makeText(this, "Picture required.", Toast.LENGTH_SHORT).show();
+                    valid = false;
+                }
+            }
         }
-
-/*
-
-        if (mPicture.getDrawable() == null) {
-            Toast.makeText(this, "Picture required.", Toast.LENGTH_SHORT).show();
-            valid = false;
-        }
-        else {
-            //picture = mPicture.get
-        }
-
-*/
 
         if (valid) {
             FirebaseUser user = auth.getCurrentUser();
