@@ -1,12 +1,15 @@
 package cs4322si.myapplication;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.google.firebase.database.Exclude;
 
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Owlitem {
+public class Owlitem implements Parcelable{
 
 /*    static public final String [] categories = {"Books", "Tech", "Food", "Services", "Transportation", "Clothes", "Home", "Entertainment", "Other"};
     static public final int catBooks = 0;
@@ -57,5 +60,46 @@ public class Owlitem {
         result.put("traded", traded);
         return result;
     }
+
+
+    // Parcelling part
+    public Owlitem(Parcel in){
+        this.title = in.readString();
+        this.username = in.readString();
+        this.ownerKey = in.readString();
+        this.category = in.readString();
+        this.description =  in.readString();
+        this.datePosted =  in.readLong();
+        this.imageLoc =  in.readString();
+    }
+
+    @Exclude
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Exclude
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(this.title);
+        dest.writeString(this.username);
+        dest.writeString(this.ownerKey);
+        dest.writeString(this.category);
+        dest.writeString(this.description);
+        dest.writeLong(this.datePosted);
+        dest.writeString(this.imageLoc);
+    }
+
+    @Exclude
+    public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
+        public Owlitem createFromParcel(Parcel in) {
+            return new Owlitem(in);
+        }
+
+        public Owlitem[] newArray(int size) {
+            return new Owlitem[size];
+        }
+    };
 
 }

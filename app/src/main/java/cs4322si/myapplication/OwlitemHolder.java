@@ -19,7 +19,7 @@ public class OwlitemHolder extends RecyclerView.ViewHolder {
     private final TextView mTitle;
     private final TextView mCategory;
     private final TextView mPoster;
-    private final ImageView mPicture;
+    public final ImageView mPicture;
 
     //Interface to send callbacks...
     public interface ClickListener{

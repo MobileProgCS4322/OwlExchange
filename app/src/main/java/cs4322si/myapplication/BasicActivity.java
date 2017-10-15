@@ -1,7 +1,11 @@
 package cs4322si.myapplication;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -15,9 +19,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.load.resource.bitmap.GlideBitmapDrawable;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.firebase.auth.FirebaseAuth;
@@ -29,6 +35,10 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
+
+import java.io.Serializable;
+
+import static cs4322si.myapplication.R.id.imageView;
 
 public class BasicActivity extends AppCompatActivity {
 
@@ -195,15 +205,26 @@ public class BasicActivity extends AppCompatActivity {
             }
 
             @Override
-            protected void onBindViewHolder(OwlitemHolder holder, int position, Owlitem model) {
+            protected void onBindViewHolder(final OwlitemHolder holder, int position, final Owlitem model) {
                 // Bind the Owlitem object to the holder
                 holder.bind(model, storage, getBaseContext());
 
                 holder.setOnClickListener(new OwlitemHolder.ClickListener() {
                     @Override
                     public void onItemClick(View view, int position) {
-                        Toast.makeText(getBaseContext(), "Item clicked at " + position, Toast.LENGTH_SHORT).show();
-                        
+                        //Toast.makeText(getBaseContext(), "Item clicked at " + position, Toast.LENGTH_SHORT).show();
+
+                        Toast.makeText(getBaseContext(), model.category, Toast.LENGTH_SHORT).show();
+                        Intent i = new Intent(getBaseContext(), ItemDetailActivity.class);
+                        i.putExtra("currentItem", (Parcelable) model);
+                        //BitmapDrawable drawable = (BitmapDrawable) holder.mPicture.getDrawable();
+                        //Bitmap bitmap = drawable.getBitmap();
+
+                        //Drawable dr = holder.mPicture.getDrawable();
+                        //Bitmap bmp =  ((GlideBitmapDrawable)dr.getCurrent()).getBitmap();
+                        //i.putExtra("mainPicture", bmp);
+
+                        startActivity(i);
                     }
 
                    @Override
@@ -257,6 +278,15 @@ public class BasicActivity extends AppCompatActivity {
             Intent i = new Intent(getBaseContext(), SettingsActivity.class);
             startActivity(i);
             return true;
+        }
+        else if (id == R.id.action_signout) {
+            FirebaseAuth auth = FirebaseAuth.getInstance();
+            FirebaseUser user = auth.getCurrentUser();
+            if (user != null) {
+                auth.signOut();
+            }
+            startActivity(new Intent(getBaseContext(), StartActivity.class));
+            finish();
         }
 
         return super.onOptionsItemSelected(item);
