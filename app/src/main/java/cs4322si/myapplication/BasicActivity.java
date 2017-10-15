@@ -108,7 +108,7 @@ public class BasicActivity extends AppCompatActivity {
 
                 attachRecyclerViewAdapter();
                 adapter.notifyDataSetChanged();
-                mRecyclerView.smoothScrollToPosition(0);
+                mRecyclerView.smoothScrollToPosition(adapter.getItemCount());
             }
         });
 
@@ -198,6 +198,19 @@ public class BasicActivity extends AppCompatActivity {
             protected void onBindViewHolder(OwlitemHolder holder, int position, Owlitem model) {
                 // Bind the Owlitem object to the holder
                 holder.bind(model, storage, getBaseContext());
+
+                holder.setOnClickListener(new OwlitemHolder.ClickListener() {
+                    @Override
+                    public void onItemClick(View view, int position) {
+                        Toast.makeText(getBaseContext(), "Item clicked at " + position, Toast.LENGTH_SHORT).show();
+                        
+                    }
+
+                   @Override
+                    public void onItemLongClick(View view, int position) {
+                        //Toast.makeText(getBaseContext(), "Item long clicked at " + position, Toast.LENGTH_SHORT).show();
+                    }
+                });
             }
 
             @Override

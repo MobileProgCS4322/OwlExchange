@@ -21,7 +21,19 @@ public class OwlitemHolder extends RecyclerView.ViewHolder {
     private final TextView mPoster;
     private final ImageView mPicture;
 
-    //StorageReference storageRef = storage.getReference();
+    //Interface to send callbacks...
+    public interface ClickListener{
+        public void onItemClick(View view, int position);
+        public void onItemLongClick(View view, int position);
+    }
+
+    private OwlitemHolder.ClickListener mClickListener;
+
+    public void setOnClickListener(OwlitemHolder.ClickListener clickListener){
+        mClickListener = clickListener;
+    }
+
+    //StorageReference s orageRef = storage.getReference();
 
     //private final FrameLayout mLeftArrow;
     //private final FrameLayout mRightArrow;
@@ -39,6 +51,23 @@ public class OwlitemHolder extends RecyclerView.ViewHolder {
 
         //mGreen300 = ContextCompat.getColor(itemView.getContext(), R.color.material_green_300);
         //mGray300 = ContextCompat.getColor(itemView.getContext(), R.color.material_gray_300);
+
+        //listener set on ENTIRE ROW, you may set on individual components within a row.
+        itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mClickListener.onItemClick(v, getAdapterPosition());
+            }
+        });
+        itemView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                mClickListener.onItemLongClick(v, getAdapterPosition());
+                return true;
+            }
+        });
+
+
     }
 
     public void bind(Owlitem item, FirebaseStorage storage, Context context) {
@@ -69,38 +98,5 @@ public class OwlitemHolder extends RecyclerView.ViewHolder {
         //FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         //setIsSender(currentUser != null && chat.getUid().equals(currentUser.getUid()));
     }
-
-
-/*    private void setName(String name) {
-        mNameField.setText(name);
-    }
-
-    private void setText(String text) {
-        mTextField.setText(text);
-    }*/
-
-/*
-    private void setIsSender(boolean isSender) {
-        final int color;
-        if (isSender) {
-            color = mGreen300;
-            mLeftArrow.setVisibility(View.GONE);
-            mRightArrow.setVisibility(View.VISIBLE);
-            mMessageContainer.setGravity(Gravity.END);
-        } else {
-            color = mGray300;
-            mLeftArrow.setVisibility(View.VISIBLE);
-            mRightArrow.setVisibility(View.GONE);
-            mMessageContainer.setGravity(Gravity.START);
-        }
-
-        ((GradientDrawable) mMessage.getBackground()).setColor(color);
-        ((RotateDrawable) mLeftArrow.getBackground()).getDrawable()
-                .setColorFilter(color, PorterDuff.Mode.SRC);
-        ((RotateDrawable) mRightArrow.getBackground()).getDrawable()
-                .setColorFilter(color, PorterDuff.Mode.SRC);
-    }
-*/
-
 
 }
