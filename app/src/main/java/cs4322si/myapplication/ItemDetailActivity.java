@@ -2,9 +2,11 @@ package cs4322si.myapplication;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -12,18 +14,38 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.firebase.ui.storage.images.FirebaseImageLoader;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
+import java.io.ByteArrayOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class ItemDetailActivity extends AppCompatActivity {
 
     //private FloatingActionButton fabBack;
+    private FloatingActionButton fabChat;
     private TextView dTitle, dCategory, dPostDate, dPoster, dDescription;
     private ImageView dPicture;
+
+
     private FirebaseStorage storage;
+    private FirebaseAuth auth;
+    private DatabaseReference mDatabase;
+
+    private static final String TAG = "ItemDetailActivity";
+
+    private Owlitem currentItem;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +72,45 @@ public class ItemDetailActivity extends AppCompatActivity {
             }
         });*/
 
+        FloatingActionButton fabChat = findViewById(R.id.fabChats);
+
+        fabChat.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                auth = FirebaseAuth.getInstance();
+                FirebaseUser user = auth.getCurrentUser();
+                if (user != null) {
+
+                    if (user.getUid().equals(currentItem.ownerKey)) {
+                        //check if messagelist exists, if current user is owner of this item...
+                        ValueEventListener messageListListener = new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                if (dataSnapshot.hasChildren()) {
+                                    //open the messageScreen.
+                                }
+                                else {
+                                    Toast.makeText(getBaseContext(), "No messages yet.", Toast.LENGTH_LONG).show();
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+                                // Getting user failed, log a message
+                                Log.w(TAG, "Read user chats list failed", databaseError.toException());
+                                // ...
+                            }
+                        };
+                        mDatabase.child("users").child(user.getUid()).child("myMessageList").addListenerForSingleValueEvent(messageListListener);
+
+                    }
+                    else {
+                        //for everyone else, just open the message list.
+                    }
+                }
+            }
+        });
+
     }
 
     @Override
@@ -57,7 +118,8 @@ public class ItemDetailActivity extends AppCompatActivity {
         super.onStart();
         //if (isSignedIn()) {
 
-        Owlitem currentItem = getIntent().getExtras().getParcelable("currentItem");
+        mDatabase = FirebaseDatabase.getInstance().getReference();
+        currentItem = getIntent().getExtras().getParcelable("currentItem");
 
         dTitle.setText("Title: " + currentItem.title);
         dCategory.setText("Category: " + currentItem.category);
@@ -71,7 +133,7 @@ public class ItemDetailActivity extends AppCompatActivity {
         storage = FirebaseStorage.getInstance();
         StorageReference gsReference = storage.getReferenceFromUrl(currentItem.imageLoc);
 
-        Toast.makeText(getBaseContext(), currentItem.imageLoc, Toast.LENGTH_SHORT).show();
+        //Toast.makeText(getBaseContext(), currentItem.imageLoc, Toast.LENGTH_SHORT).show();
 
         Glide.with(getBaseContext())
                 .using(new FirebaseImageLoader())

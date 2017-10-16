@@ -212,9 +212,7 @@ public class BasicActivity extends AppCompatActivity {
                 holder.setOnClickListener(new OwlitemHolder.ClickListener() {
                     @Override
                     public void onItemClick(View view, int position) {
-                        //Toast.makeText(getBaseContext(), "Item clicked at " + position, Toast.LENGTH_SHORT).show();
-
-                        Toast.makeText(getBaseContext(), model.category, Toast.LENGTH_SHORT).show();
+                        //Toast.makeText(getBaseContext(), model.category, Toast.LENGTH_SHORT).show();
                         Intent i = new Intent(getBaseContext(), ItemDetailActivity.class);
                         i.putExtra("currentItem", (Parcelable) model);
                         //BitmapDrawable drawable = (BitmapDrawable) holder.mPicture.getDrawable();
