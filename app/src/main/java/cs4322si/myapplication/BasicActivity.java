@@ -213,8 +213,12 @@ public class BasicActivity extends AppCompatActivity {
                     @Override
                     public void onItemClick(View view, int position) {
                         //Toast.makeText(getBaseContext(), model.category, Toast.LENGTH_SHORT).show();
+
+                        DatabaseReference itemRef = getRef(position);
+                        String itemKey = itemRef.getKey();
                         Intent i = new Intent(getBaseContext(), ItemDetailActivity.class);
                         i.putExtra("currentItem", (Parcelable) model);
+                        i.putExtra("itemKey", itemKey);
                         //BitmapDrawable drawable = (BitmapDrawable) holder.mPicture.getDrawable();
                         //Bitmap bitmap = drawable.getBitmap();
 

@@ -2,6 +2,7 @@ package cs4322si.myapplication;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
@@ -47,6 +48,8 @@ public class ItemDetailActivity extends AppCompatActivity {
 
     private Owlitem currentItem;
 
+    private String itemKey;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -88,6 +91,7 @@ public class ItemDetailActivity extends AppCompatActivity {
                             public void onDataChange(DataSnapshot dataSnapshot) {
                                 if (dataSnapshot.hasChildren()) {
                                     //open the messageScreen.
+                                    startChatActivity(true);
                                 }
                                 else {
                                     Toast.makeText(getBaseContext(), "No messages yet.", Toast.LENGTH_LONG).show();
@@ -106,12 +110,22 @@ public class ItemDetailActivity extends AppCompatActivity {
                     }
                     else {
                         //for everyone else, just open the message list.
+                        startChatActivity(false);
                     }
                 }
             }
         });
 
     }
+
+    private void startChatActivity (boolean isOwner) {
+        Intent i = new Intent(getBaseContext(), ItemChatActivity.class);
+        i.putExtra("isOwner", isOwner);
+        i.putExtra("itemKey", itemKey);
+        i.putExtra("currentItem", (Parcelable) currentItem);
+        startActivity(i);
+    }
+
 
     @Override
     public void onStart() {
@@ -120,6 +134,7 @@ public class ItemDetailActivity extends AppCompatActivity {
 
         mDatabase = FirebaseDatabase.getInstance().getReference();
         currentItem = getIntent().getExtras().getParcelable("currentItem");
+        itemKey = (String)getIntent().getExtras().get("itemKey");
 
         dTitle.setText("Title: " + currentItem.title);
         dCategory.setText("Category: " + currentItem.category);

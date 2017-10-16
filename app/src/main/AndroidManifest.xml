@@ -59,7 +59,10 @@
         <activity
             android:name=".PostNewItemActivity"
             android:screenOrientation="portrait" />
-        <activity android:name=".ItemDetailActivity"></activity>
+        <activity android:name=".ItemDetailActivity" />
+        <activity
+            android:name=".ItemChatActivity"
+            android:label="@string/title_activity_item_chat"></activity>
     </application>
 
 </manifest>

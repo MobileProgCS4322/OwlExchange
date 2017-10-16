@@ -24,6 +24,7 @@
                 android:layout_height="wrap_content"
                 android:text="title"
                 android:textAlignment="textStart"
+                android:gravity="start"
                 android:textSize="18sp" />
 
             <TextView
@@ -32,6 +33,7 @@
                 android:layout_height="wrap_content"
                 android:text="category"
                 android:textAlignment="textStart"
+                android:gravity="start"
                 android:textSize="18sp" />
 
             <TextView
@@ -40,6 +42,7 @@
                 android:layout_height="wrap_content"
                 android:text="seller"
                 android:textAlignment="textStart"
+                android:gravity="start"
                 android:textSize="18sp" />
 
         </LinearLayout>

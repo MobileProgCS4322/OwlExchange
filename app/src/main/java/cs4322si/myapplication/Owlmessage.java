@@ -11,18 +11,21 @@ public class Owlmessage {
     public String itemId;
     public String itemDescription;      //for convenience
 
+    public String message;      //for convenience
+
     public long timestamp = System.currentTimeMillis();
 
 
     public Owlmessage() {}
 
-    public Owlmessage(String senderUsername, String senderUserid, String receiverUsername, String receiverUserid, String itemId, String itemDescription) {
+    public Owlmessage(String senderUsername, String senderUserid, String receiverUsername, String receiverUserid, String itemId, String itemDescription, String message) {
         this.senderUsername = senderUsername;
         this.senderUserid = senderUserid;
         this.receiverUsername = receiverUsername;
         this.receiverUserid = receiverUserid;
         this.itemId = itemId;
         this.itemDescription = itemDescription;
+        this.message = message;
     }
 
 }

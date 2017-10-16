@@ -22,8 +22,7 @@
 
     <include
         android:id="@+id/include"
-        layout="@layout/content_basic"
-        android:layout_weight="1" />
+        layout="@layout/content_basic" />
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fabMessaging"
