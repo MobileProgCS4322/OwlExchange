@@ -50,7 +50,7 @@ public class ItemChatActivity extends AppCompatActivity {
     private static final String TAG = "ItemChatActivity";
 
     private String itemKey;
-    private boolean isOwner;
+    //private boolean isOwner;
     private Owlitem currentItem;
     private String username;
 
@@ -118,7 +118,7 @@ public class ItemChatActivity extends AppCompatActivity {
             mDatabase.child("users").child(user.getUid()).addListenerForSingleValueEvent(userListener);
 
             itemKey = (String)getIntent().getExtras().get("itemKey");
-            isOwner = (boolean)getIntent().getExtras().get("isOwner");
+            //isOwner = (boolean)getIntent().getExtras().get("isOwner");
             currentItem = getIntent().getExtras().getParcelable("currentItem");
             attachRecyclerViewAdapter();
         }
@@ -132,12 +132,12 @@ public class ItemChatActivity extends AppCompatActivity {
         adapter = newAdapter();
 
         // Scroll to bottom on new messages
-        //adapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
-        //    @Override
-        //    public void onItemRangeInserted(int positionStart, int itemCount) {
-        //        mRecyclerView.smoothScrollToPosition(adapter.getItemCount());
-        //    }
-        //});
+        adapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
+            @Override
+            public void onItemRangeInserted(int positionStart, int itemCount) {
+                mRecyclerView.smoothScrollToPosition(adapter.getItemCount());
+            }
+        });
 
         mRecyclerView.setAdapter(adapter);
     }
@@ -152,12 +152,15 @@ public class ItemChatActivity extends AppCompatActivity {
 
 
         Query query;
-        if (isOwner) {  //get all messages
-            query = mDatabase.child("messages").child(itemKey);
+        query = mDatabase.child("messages").child(itemKey);
+
+        //query.addValueEventListener()
+/*        if (isOwner) {  //get all messages
+
         }
         else {
             query = mDatabase.child("messages").child(itemKey);
-        }
+        }*/
 
         FirebaseRecyclerOptions<Owlmessage> options =
                 new FirebaseRecyclerOptions.Builder<Owlmessage>()
@@ -166,6 +169,7 @@ public class ItemChatActivity extends AppCompatActivity {
                         .build();
 
         return new FirebaseRecyclerAdapter<Owlmessage, OwlmessageHolder>(options) {
+
             @Override
             public OwlmessageHolder onCreateViewHolder(ViewGroup parent, int viewType) {
                 // Create a new instance of the ViewHolder, in this case we are using a custom
@@ -177,9 +181,9 @@ public class ItemChatActivity extends AppCompatActivity {
             }
 
             @Override
-            protected void onBindViewHolder(final OwlmessageHolder holder, int position, final Owlmessage model) {
+            protected void onBindViewHolder(OwlmessageHolder holder, int position, Owlmessage msg) {
                 // Bind the Owlmessage object to the holder
-                holder.bind(model);
+                holder.bind(msg, currentItem);
             }
 
             @Override

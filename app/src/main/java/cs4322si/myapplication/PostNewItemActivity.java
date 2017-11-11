@@ -23,6 +23,9 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.animation.GlideAnimation;
+import com.bumptech.glide.request.target.SimpleTarget;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -61,8 +64,9 @@ public class PostNewItemActivity extends AppCompatActivity {
     String mCurrentPhotoPath;       //filepath saved here
 
     private static final String TAG = "PostNewItem";
+    private Bitmap theImageBitmap;
 
-    private static final int REQUEST_IMAGE_CAPTURE = 456;
+    //private static final int REQUEST_IMAGE_CAPTURE = 456;
     private static final int REQUEST_IMAGE_FILESAVE = 789;
 
     @Override
@@ -75,32 +79,6 @@ public class PostNewItemActivity extends AppCompatActivity {
         storage = FirebaseStorage.getInstance();
 
         mCategory = findViewById(R.id.mCategory);
-
-/*        ArrayAdapter<String> myAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item) {
-            @Override
-            public boolean isEnabled(int position){
-                // Disable the first item from Spinner
-                // First item will be use for hint
-                return (!(position == 0));
-            }
-
-            @Override
-            public View getDropDownView(int position, View convertView,
-                                        ViewGroup parent) {
-                View view = super.getDropDownView(position, convertView, parent);
-                TextView tv = (TextView) view;
-                if(position == 0){
-                    // Set the hint text color gray
-                    tv.setTextColor(Color.GRAY);
-                }
-                else {
-                    tv.setTextColor(Color.BLACK);
-                }
-                return view;
-            }
-
-
-        };*/
 
         ArrayAdapter adapter = ArrayAdapter.createFromResource(this,
                 R.array.owlCategories, android.R.layout.simple_spinner_item);
@@ -130,13 +108,6 @@ public class PostNewItemActivity extends AppCompatActivity {
 
     }
 
-    private void dispatchTakePictureIntent2() {
-        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-            startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
-        }
-    }
-
     private void dispatchTakePictureIntent() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         // Ensure that there's a camera activity to handle the intent
@@ -161,11 +132,11 @@ public class PostNewItemActivity extends AppCompatActivity {
     private File createImageFile() throws IOException {
         // Create an image file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String imageFileName = "JPEG_" + timeStamp + "_";
+        String imageFileName = "BMP_" + timeStamp + "_";
         File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
         File image = File.createTempFile(
                 imageFileName, /* prefix */
-                ".jpg",/* suffix */
+                ".bmp",/* suffix */
                 storageDir/* directory */
         );
 
@@ -180,16 +151,24 @@ public class PostNewItemActivity extends AppCompatActivity {
            if (requestCode == REQUEST_IMAGE_FILESAVE) {
                 File imgFile = new File(mCurrentPhotoPath);
                 if (imgFile.exists()) {
-                    Bitmap myBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
-                    mPicture.setImageBitmap(myBitmap);
+                    //Glide.with(this).load(imgFile).into(mPicture);
+
+                    Glide.with(this)
+                            .load(imgFile)
+                            .asBitmap()
+                            .into(new SimpleTarget<Bitmap>() {
+                                @Override
+                                public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
+                                    mPicture.setImageBitmap(resource);
+                                    theImageBitmap = resource;
+                                }
+                            });
+
+                    //Bitmap myBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
+                    //mPicture.setImageBitmap(myBitmap);
+                    mPicture.setBackgroundColor(Color.WHITE);
                 }
 
-            }
-            else if (requestCode == REQUEST_IMAGE_CAPTURE) {
-                Bundle extras = data.getExtras();
-                Bitmap imageBitmap = (Bitmap) extras.get("data");
-                mPicture.setImageBitmap(imageBitmap);
-                Toast.makeText(PostNewItemActivity.this, "took a picture...", Toast.LENGTH_LONG).show();
             }
         }
     }
@@ -249,11 +228,11 @@ public class PostNewItemActivity extends AppCompatActivity {
                         String imageLoc = storageRef.toString();
 
                         // Get the data from an ImageView as bytes
-                        mPicture.setDrawingCacheEnabled(true);
-                        mPicture.buildDrawingCache();
-                        Bitmap bitmap = mPicture.getDrawingCache();
+                        //mPicture.setDrawingCacheEnabled(true);
+                        //mPicture.buildDrawingCache();
+                        //Bitmap theImageBitmap = mPicture.getDrawingCache();
                         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+                        theImageBitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
                         byte[] data = baos.toByteArray();
 
                         UploadTask uploadTask = storageRef.putBytes(data);

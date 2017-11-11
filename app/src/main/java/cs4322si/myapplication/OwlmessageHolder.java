@@ -24,6 +24,8 @@ import com.google.firebase.storage.StorageReference;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import static android.view.View.GONE;
+
 public class OwlmessageHolder extends RecyclerView.ViewHolder {
 
     private final TextView mNameField;
@@ -50,29 +52,48 @@ public class OwlmessageHolder extends RecyclerView.ViewHolder {
         mGray300 = ContextCompat.getColor(itemView.getContext(), R.color.material_gray_300);
     }
 
-    public void bind(Owlmessage msg) {
-        mNameField.setText(msg.senderUsername);
-        mTextField.setText(msg.message);
-
-        Date timestamp = new Date(msg.timestamp);
-        SimpleDateFormat spf= new SimpleDateFormat("YYYY-MM-dd HH:mm:ss");
-        mTimeStamp.setText(spf.format(timestamp));
+    public void bind(Owlmessage msg, Owlitem currItem) {
 
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-        setIsSender(currentUser != null && msg.senderUserid.equals(currentUser.getUid()));
+        //if currentUser is the owner of item, show all messages.
+        //  if (currentUser.getUid() == currItem.ownerKey)
+        //otherwise, only show message if currentUser=sender/receiver.
+        // or sender=receiver=owner (sent to all)
+
+        String currUserId = currentUser.getUid();
+        if ((currUserId.equals(currItem.ownerKey)) ||
+            (currUserId.equals(msg.senderUserid)) ||
+            (currUserId.equals(msg.receiverUserid)) ||
+           ((msg.senderUserid.equals(msg.receiverUserid)) && msg.senderUserid.equals(currItem.ownerKey))) {
+
+            mNameField.setText(msg.senderUsername);
+            mTextField.setText(msg.message);
+
+            Date timestamp = new Date(msg.timestamp);
+            SimpleDateFormat spf = new SimpleDateFormat("YYYY-MM-dd HH:mm:ss");
+            mTimeStamp.setText(spf.format(timestamp));
+
+
+            setIsSender(currentUser != null && msg.senderUserid.equals(currentUser.getUid()));
+        }
+        else {
+            mMessageContainer.getLayoutParams().height = 0;
+            mMessageContainer.requestLayout();
+            mMessageContainer.setVisibility(GONE);
+        }
     }
 
     private void setIsSender(boolean isSender) {
         final int color;
         if (isSender) {
             color = mGreen300;
-            mLeftArrow.setVisibility(View.GONE);
+            mLeftArrow.setVisibility(GONE);
             mRightArrow.setVisibility(View.VISIBLE);
             mMessageContainer.setGravity(Gravity.END);
         } else {
             color = mGray300;
             mLeftArrow.setVisibility(View.VISIBLE);
-            mRightArrow.setVisibility(View.GONE);
+            mRightArrow.setVisibility(GONE);
             mMessageContainer.setGravity(Gravity.START);
         }
 

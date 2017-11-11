@@ -1,9 +1,7 @@
 package cs4322si.myapplication;
 
+import android.app.Activity;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.design.widget.FloatingActionButton;
@@ -12,33 +10,22 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.bumptech.glide.load.resource.bitmap.GlideBitmapDrawable;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
-import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
-
-import java.io.Serializable;
-
-import static cs4322si.myapplication.R.id.imageView;
 
 public class BasicActivity extends AppCompatActivity {
 
@@ -54,7 +41,7 @@ public class BasicActivity extends AppCompatActivity {
     private static final Query query = FirebaseDatabase.getInstance().getReference().child("items").limitToLast(25);
 
     private static final String TAG = "MainPage";
-
+    private static final int SET_SEARCH_FILTER = 987;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -119,6 +106,14 @@ public class BasicActivity extends AppCompatActivity {
                 attachRecyclerViewAdapter();
                 adapter.notifyDataSetChanged();
                 mRecyclerView.smoothScrollToPosition(adapter.getItemCount());
+            }
+        });
+
+        fabSearch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent i = new Intent(getBaseContext(), SetSearchActivity.class);
+                startActivityForResult (i,SET_SEARCH_FILTER);
             }
         });
 
@@ -293,4 +288,20 @@ public class BasicActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+        if (requestCode == SET_SEARCH_FILTER) {
+            if(resultCode == Activity.RESULT_OK){
+                //Toast.makeText(this, "Search set OK", Toast.LENGTH_SHORT).show();
+                //String result=data.getStringExtra("result");
+            }
+            if (resultCode == Activity.RESULT_CANCELED) {
+                //Write your code if there's no result
+                //Toast.makeText(this, "Search set canceled", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }//onActivityResult
+
 }

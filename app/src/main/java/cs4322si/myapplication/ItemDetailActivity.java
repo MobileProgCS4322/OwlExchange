@@ -2,6 +2,7 @@ package cs4322si.myapplication;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -80,47 +81,52 @@ public class ItemDetailActivity extends AppCompatActivity {
         fabChat.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                auth = FirebaseAuth.getInstance();
-                FirebaseUser user = auth.getCurrentUser();
-                if (user != null) {
-
-                    if (user.getUid().equals(currentItem.ownerKey)) {
-                        //check if messagelist exists, if current user is owner of this item...
-                        ValueEventListener messageListListener = new ValueEventListener() {
-                            @Override
-                            public void onDataChange(DataSnapshot dataSnapshot) {
-                                if (dataSnapshot.hasChildren()) {
-                                    //open the messageScreen.
-                                    startChatActivity(true);
-                                }
-                                else {
-                                    Toast.makeText(getBaseContext(), "No messages yet.", Toast.LENGTH_LONG).show();
-                                }
-                            }
-
-                            @Override
-                            public void onCancelled(DatabaseError databaseError) {
-                                // Getting user failed, log a message
-                                Log.w(TAG, "Read user chats list failed", databaseError.toException());
-                                // ...
-                            }
-                        };
-                        mDatabase.child("users").child(user.getUid()).child("myMessageList").addListenerForSingleValueEvent(messageListListener);
-
-                    }
-                    else {
-                        //for everyone else, just open the message list.
-                        startChatActivity(false);
-                    }
-                }
+                btnChatClick();
             }
         });
 
     }
 
+    private void btnChatClick() {
+        auth = FirebaseAuth.getInstance();
+        FirebaseUser user = auth.getCurrentUser();
+        if (user != null) {
+
+            if (user.getUid().equals(currentItem.ownerKey)) {
+                //check if messagelist exists, if current user is owner of this item...
+                ValueEventListener messageListListener = new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        if (dataSnapshot.hasChildren()) {
+                            //open the messageScreen.
+                            startChatActivity(true);
+                        }
+                        else {
+                            Toast.makeText(getBaseContext(), "No messages yet.", Toast.LENGTH_LONG).show();
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                        // Getting user failed, log a message
+                        Log.w(TAG, "Read user chats list failed", databaseError.toException());
+                        // ...
+                    }
+                };
+                mDatabase.child("users").child(user.getUid()).child("myMessageList").child(itemKey).addListenerForSingleValueEvent(messageListListener);
+
+            }
+            else {
+                //for everyone else, just open the message list.
+                startChatActivity(false);
+            }
+        }
+    }
+
+
     private void startChatActivity (boolean isOwner) {
         Intent i = new Intent(getBaseContext(), ItemChatActivity.class);
-        i.putExtra("isOwner", isOwner);
+        //i.putExtra("isOwner", isOwner);
         i.putExtra("itemKey", itemKey);
         i.putExtra("currentItem", (Parcelable) currentItem);
         startActivity(i);
@@ -154,6 +160,7 @@ public class ItemDetailActivity extends AppCompatActivity {
                 .using(new FirebaseImageLoader())
                 .load(gsReference)
                 .into(dPicture);
+        dPicture.setBackgroundColor(Color.WHITE);
     }
 
 }

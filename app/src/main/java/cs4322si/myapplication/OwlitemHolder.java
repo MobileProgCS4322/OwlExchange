@@ -1,6 +1,7 @@
 package cs4322si.myapplication;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
@@ -20,6 +21,7 @@ public class OwlitemHolder extends RecyclerView.ViewHolder {
     private final TextView mCategory;
     private final TextView mPoster;
     public final ImageView mPicture;
+    //public final ImageViewFullView mPicture;
 
     //Interface to send callbacks...
     public interface ClickListener{

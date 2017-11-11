@@ -41,6 +41,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:clickable="true"
+        android:focusable="true"
         app:fabSize="mini"
         app:srcCompat="@drawable/ic_chat_bubble_outline_black_24dp"
         tools:layout_constraintRight_creator="1"
@@ -105,6 +106,7 @@
             android:layout_height="wrap_content"
             android:text="postdate"
             android:textAlignment="textEnd"
+            android:gravity="end"
             tools:layout_editor_absoluteX="303dp"
             tools:layout_editor_absoluteY="16dp" />
 
@@ -114,6 +116,7 @@
             android:layout_height="wrap_content"
             android:text="poster"
             android:textAlignment="textEnd"
+            android:gravity="end"
             tools:layout_editor_absoluteX="303dp"
             tools:layout_editor_absoluteY="43dp" />
     </LinearLayout>
@@ -126,6 +129,7 @@
         android:layout_marginLeft="16dp"
         android:layout_marginStart="16dp"
         android:clickable="true"
+        android:focusable="true"
         android:visibility="gone"
         app:fabSize="mini"
         app:layout_constraintBottom_toBottomOf="parent"

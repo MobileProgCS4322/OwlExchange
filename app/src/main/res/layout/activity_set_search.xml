@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="cs4322si.myapplication.SetSearchActivity">
+
+
+    <TextView
+        android:id="@+id/labelCategorySearch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:layout_marginLeft="19dp"
+        android:layout_marginStart="19dp"
+        android:layout_marginTop="36dp"
+        android:text="Search by Category"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toTopOf="@+id/mCategory"
+        app:layout_constraintStart_toStartOf="@+id/mCategory"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Spinner
+        android:id="@+id/mCategory"
+        android:layout_width="193dp"
+        android:layout_height="0dp"
+        android:layout_marginBottom="36dp"
+        app:layout_constraintBottom_toTopOf="@+id/labelKeywordSearch"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/labelCategorySearch" />
+
+
+    <TextView
+        android:id="@+id/labelKeywordSearch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="13dp"
+        android:layout_marginLeft="29dp"
+        android:layout_marginStart="29dp"
+        android:text="Search by Key word"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toTopOf="@+id/mSearchText"
+        app:layout_constraintStart_toStartOf="@+id/mSearchText"
+        app:layout_constraintTop_toBottomOf="@+id/mCategory" />
+
+    <EditText
+        android:id="@+id/mSearchText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="51dp"
+        android:layout_marginEnd="84dp"
+        android:layout_marginStart="84dp"
+        android:ems="10"
+        android:hint="Enter Search Text"
+        android:inputType="textShortMessage"
+        app:layout_constraintBottom_toTopOf="@+id/labelDateSearch"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/labelKeywordSearch" />
+
+    <TextView
+        android:id="@+id/labelDateSearch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="17dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginStart="20dp"
+        android:text="Search by Date Range"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toTopOf="@+id/mStartDate"
+        app:layout_constraintStart_toStartOf="@+id/mStartDate"
+        app:layout_constraintTop_toBottomOf="@+id/mSearchText" />
+
+    <EditText
+        android:id="@+id/mStartDate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="11dp"
+        android:ems="10"
+        android:hint="Enter Start Date"
+        android:inputType="date"
+        app:layout_constraintBottom_toTopOf="@+id/mEndDate"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/labelDateSearch" />
+
+    <EditText
+        android:id="@+id/mEndDate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="48dp"
+        android:ems="10"
+        android:hint="Enter End Date"
+        android:inputType="date"
+        app:layout_constraintBottom_toTopOf="@+id/btnCancel"
+        app:layout_constraintStart_toStartOf="@+id/mStartDate"
+        app:layout_constraintTop_toBottomOf="@+id/mStartDate" />
+
+    <Button
+        android:id="@+id/btnSearch"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="60dp"
+        android:layout_marginLeft="60dp"
+        android:layout_marginBottom="55dp"
+        android:onClick="btnClick"
+        android:text="Search"
+        android:textSize="14sp"
+        android:theme="@style/ThemeOverlay.MyDarkButton"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/btnCancel"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="60dp"
+        android:layout_marginEnd="60dp"
+        android:layout_marginBottom="55dp"
+        android:onClick="btnClick"
+        android:text="Cancel"
+        android:textSize="14sp"
+        android:theme="@style/ThemeOverlay.MyDarkButton"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+</android.support.constraint.ConstraintLayout>

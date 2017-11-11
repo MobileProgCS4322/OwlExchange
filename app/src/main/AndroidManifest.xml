@@ -22,11 +22,9 @@
             android:authorities="cs4322si.myapplication.fileprovider"
             android:exported="false"
             android:grantUriPermissions="true">
-               
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
-               
         </provider>
 
         <activity
@@ -62,7 +60,8 @@
         <activity android:name=".ItemDetailActivity" />
         <activity
             android:name=".ItemChatActivity"
-            android:label="@string/title_activity_item_chat"></activity>
+            android:label="@string/title_activity_item_chat" />
+        <activity android:name=".SetSearchActivity"></activity>
     </application>
 
 </manifest>
