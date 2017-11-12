@@ -17,8 +17,9 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.storage.FirebaseStorage;
 
-public class EmailVerificationActivity extends AppCompatActivity {
+public class EmailVerificationActivity extends AppCompatActivity implements FirebaseAuth.AuthStateListener {
 
     private FirebaseAuth auth;
 
@@ -65,6 +66,31 @@ public class EmailVerificationActivity extends AppCompatActivity {
         });
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+        FirebaseAuth.getInstance().addAuthStateListener(this);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        FirebaseAuth.getInstance().removeAuthStateListener(this);
+    }
+
+    @Override
+    public void onAuthStateChanged(@NonNull FirebaseAuth auth) {
+        if (!isSignedIn()) {
+            startActivity(new Intent(getBaseContext(), StartActivity.class));
+            finish();
+        }
+    }
+
+    private boolean isSignedIn() {
+        return FirebaseAuth.getInstance().getCurrentUser() != null;
+    }
+
+
     private void sendEmailVerification() {
         // [START send_email_verification]
         final FirebaseUser user = auth.getCurrentUser();
@@ -82,9 +108,9 @@ public class EmailVerificationActivity extends AppCompatActivity {
                                             "Verification email sent to " + user.getEmail() + ".  Please click the link to activate your account.",
                                             Toast.LENGTH_LONG).show();
                                     auth.signOut();
-                                    Intent i = new Intent(getBaseContext(), StartActivity.class);
-                                    startActivity(i);
-                                    finish();
+                                    //Intent i = new Intent(getBaseContext(), StartActivity.class);
+                                    //startActivity(i);
+                                    //finish();
                                 } else {
                                     //emailSent = false;
                                     Log.e(TAG, "sendEmailVerification", task.getException());

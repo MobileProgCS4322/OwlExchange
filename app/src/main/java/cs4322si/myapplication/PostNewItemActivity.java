@@ -50,7 +50,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-public class PostNewItemActivity extends AppCompatActivity {
+public class PostNewItemActivity extends AppCompatActivity implements FirebaseAuth.AuthStateListener{
 
     private Button btnCamera, btnPost;
     private Spinner mCategory;
@@ -106,6 +106,30 @@ public class PostNewItemActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        FirebaseAuth.getInstance().addAuthStateListener(this);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        FirebaseAuth.getInstance().removeAuthStateListener(this);
+    }
+
+    @Override
+    public void onAuthStateChanged(@NonNull FirebaseAuth auth) {
+        if (!isSignedIn()) {
+            startActivity(new Intent(getBaseContext(), StartActivity.class));
+            finish();
+        }
+    }
+
+    private boolean isSignedIn() {
+        return FirebaseAuth.getInstance().getCurrentUser() != null;
     }
 
     private void dispatchTakePictureIntent() {

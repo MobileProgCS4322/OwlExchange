@@ -33,7 +33,7 @@ import java.io.ByteArrayOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class ItemDetailActivity extends AppCompatActivity {
+public class ItemDetailActivity extends AppCompatActivity implements FirebaseAuth.AuthStateListener {
 
     //private FloatingActionButton fabBack;
     private FloatingActionButton fabChat;
@@ -136,6 +136,7 @@ public class ItemDetailActivity extends AppCompatActivity {
     @Override
     public void onStart() {
         super.onStart();
+        FirebaseAuth.getInstance().addAuthStateListener(this);
         //if (isSignedIn()) {
 
         mDatabase = FirebaseDatabase.getInstance().getReference();
@@ -161,6 +162,24 @@ public class ItemDetailActivity extends AppCompatActivity {
                 .load(gsReference)
                 .into(dPicture);
         dPicture.setBackgroundColor(Color.WHITE);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        FirebaseAuth.getInstance().removeAuthStateListener(this);
+    }
+
+    @Override
+    public void onAuthStateChanged(@NonNull FirebaseAuth auth) {
+        if (!isSignedIn()) {
+            startActivity(new Intent(getBaseContext(), StartActivity.class));
+            finish();
+        }
+    }
+
+    private boolean isSignedIn() {
+        return FirebaseAuth.getInstance().getCurrentUser() != null;
     }
 
 }

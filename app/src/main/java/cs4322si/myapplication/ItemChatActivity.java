@@ -36,7 +36,7 @@ import com.google.firebase.storage.UploadTask;
 
 import java.io.ByteArrayOutputStream;
 
-public class ItemChatActivity extends AppCompatActivity {
+public class ItemChatActivity extends AppCompatActivity implements FirebaseAuth.AuthStateListener {
 
     private TextView mEmptyListMessage;
     private EditText mMessageEdit;
@@ -97,6 +97,8 @@ public class ItemChatActivity extends AppCompatActivity {
     @Override
     public void onStart() {
         super.onStart();
+        FirebaseAuth.getInstance().addAuthStateListener(this);
+
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user != null) {
 
@@ -114,7 +116,6 @@ public class ItemChatActivity extends AppCompatActivity {
                     // ...
                 }
             };
-
             mDatabase.child("users").child(user.getUid()).addListenerForSingleValueEvent(userListener);
 
             itemKey = (String)getIntent().getExtras().get("itemKey");
@@ -125,6 +126,24 @@ public class ItemChatActivity extends AppCompatActivity {
 
     }
 
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        FirebaseAuth.getInstance().removeAuthStateListener(this);
+    }
+
+    @Override
+    public void onAuthStateChanged(@NonNull FirebaseAuth auth) {
+        if (!isSignedIn()) {
+            startActivity(new Intent(getBaseContext(), StartActivity.class));
+            finish();
+        }
+    }
+
+    private boolean isSignedIn() {
+        return FirebaseAuth.getInstance().getCurrentUser() != null;
+    }
 
 
     private void attachRecyclerViewAdapter() {
