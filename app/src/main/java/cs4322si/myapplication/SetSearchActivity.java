@@ -48,7 +48,7 @@ public class SetSearchActivity extends AppCompatActivity implements FirebaseAuth
 
     }
 
-    protected void btnClick(View view) {
+    public void btnClick(View view) {
         Intent returnIntent;
         switch (view.getId()) {
             case R.id.btnSearch:
