@@ -11,6 +11,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -23,28 +24,45 @@ import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 public class BasicActivity extends AppCompatActivity implements FirebaseAuth.AuthStateListener {
 
-    //private FirebaseAuth auth;
     private DatabaseReference mDatabase;
     private FirebaseStorage storage;
 
     private TextView mEmptyListMessage;
+    private FloatingActionButton fabSearch;
 
     private RecyclerView mRecyclerView;
-    private FirebaseRecyclerAdapter  adapter;
+    //private FirebaseRecyclerAdapter  adapter;
+    private OwlitemAdapter owlitemAdapter;
+    private Query query;
+    private ArrayList<Owlitem> owlitemList = new ArrayList<>();
 
-    private static final Query query = FirebaseDatabase.getInstance().getReference().child("items").limitToLast(25);
+    private List<String> categories;
+
+    //private static final Query query = FirebaseDatabase.getInstance().getReference().child("items").limitToLast(25);
+
 
     private static final String TAG = "MainPage";
     private static final int SET_SEARCH_FILTER = 987;
+    private boolean searchFilterOn = false;
+    int searchCat;
+    String searchText;
+    Date searchStartDate, searchEndDate;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,12 +71,11 @@ public class BasicActivity extends AppCompatActivity implements FirebaseAuth.Aut
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        categories = Arrays.asList(getResources().getStringArray(R.array.owlCategories));
+
         mEmptyListMessage = findViewById(R.id.emptyTextView);
 
-
         mDatabase = FirebaseDatabase.getInstance().getReference();
-        //auth = FirebaseAuth.getInstance();
-        //storage = FirebaseStorage.getInstance();
 
         mRecyclerView = findViewById(R.id.itemsRecycler);
 
@@ -81,7 +98,7 @@ public class BasicActivity extends AppCompatActivity implements FirebaseAuth.Aut
         FloatingActionButton fabMessaging = (FloatingActionButton) findViewById(R.id.fabMessaging);
         FloatingActionButton fabAdd = (FloatingActionButton) findViewById(R.id.fabAdd);
         FloatingActionButton fabHome = (FloatingActionButton) findViewById(R.id.fabHome);
-        FloatingActionButton fabSearch = (FloatingActionButton) findViewById(R.id.fabSearch);
+        fabSearch = (FloatingActionButton) findViewById(R.id.fabSearch);
 
         fabAdd.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -102,25 +119,30 @@ public class BasicActivity extends AppCompatActivity implements FirebaseAuth.Aut
         fabHome.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //if (adapter != null) {
-
                 //mFirebaseRecyclerViewAdapter.cleanup()
-
                 attachRecyclerViewAdapter();
-                adapter.notifyDataSetChanged();
-                mRecyclerView.smoothScrollToPosition(adapter.getItemCount());
+                //owlitemAdapter.notifyDataSetChanged();
+                if (owlitemAdapter != null) {
+                    mRecyclerView.smoothScrollToPosition(owlitemAdapter.getItemCount());
+                }
             }
         });
 
         fabSearch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent i = new Intent(getBaseContext(), SetSearchActivity.class);
-                startActivityForResult (i,SET_SEARCH_FILTER);
+
+                if (!searchFilterOn) {
+                    Intent i = new Intent(getBaseContext(), SetSearchActivity.class);
+                    startActivityForResult(i, SET_SEARCH_FILTER);
+                }
+                else {
+                    fabSearch.setImageResource(R.drawable.ic_search_black_24dp);
+                    searchFilterOn = false;
+                    attachRecyclerViewAdapter();
+                }
             }
         });
-
-
 
     }
 
@@ -150,32 +172,30 @@ public class BasicActivity extends AppCompatActivity implements FirebaseAuth.Aut
 
 
     private void attachRecyclerViewAdapter() {
-        //RecyclerView.Adapter adapter = newAdapter();
-        adapter = newAdapter();
 
-        // Scroll to bottom on new messages
-        //adapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
-        //    @Override
-        //    public void onItemRangeInserted(int positionStart, int itemCount) {
-        //        mRecyclerView.smoothScrollToPosition(adapter.getItemCount());
-        //    }
-        //});
-
-        mRecyclerView.setAdapter(adapter);
-    }
-
-    protected FirebaseRecyclerAdapter newAdapter() {
-
-/*
-        //code to check if query/recycler was being loaded with items
-        ValueEventListener itemListener = new ValueEventListener() {
+        if (!searchFilterOn) {
+            query = mDatabase.child("items");
+        }
+        else {
+            if (searchCat==0) {     //no category selected
+                query = mDatabase.child("items");
+            }
+            else {
+                query = mDatabase.child("items").orderByChild("category").equalTo(categories.get(searchCat));
+            }
+        }
+        query.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                // Get Post object and use the values to update the UI
-                //Owlitem item = dataSnapshot.getValue(Owlitem.class);
-                // ...
-                String numItems = String.valueOf(dataSnapshot.getChildrenCount());
-                Toast.makeText(BasicActivity.this, numItems, Toast.LENGTH_SHORT).show();
+                mEmptyListMessage.setVisibility(!dataSnapshot.hasChildren() ? View.VISIBLE : View.GONE);
+
+                owlitemList = new ArrayList<>();
+                for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                    Owlitem item = postSnapshot.getValue(Owlitem.class);
+                    owlitemList.add(item);
+                }
+                owlitemAdapter = new OwlitemAdapter(owlitemList);
+                mRecyclerView.setAdapter(owlitemAdapter);
             }
 
             @Override
@@ -184,12 +204,46 @@ public class BasicActivity extends AppCompatActivity implements FirebaseAuth.Aut
                 Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
                 // ...
             }
-        };
-        query.addValueEventListener(itemListener);
+        });
 
-*/
+        //owlitemAdapter = new OwlitemAdapter()
+
+        //RecyclerView.Adapter adapter = newAdapter();
+        //owlitemAdapter = newAdapter();
+        // Scroll to bottom on new messages
+        //adapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
+        //    @Override
+        //    public void onItemRangeInserted(int positionStart, int itemCount) {
+        //        mRecyclerView.smoothScrollToPosition(adapter.getItemCount());
+        //    }
+        //});
+
+    }
+
+ /*   protected FirebaseRecyclerAdapter newAdapter() {
+
+//        //code to check if query/recycler was being loaded with items
+//        ValueEventListener itemListener = new ValueEventListener() {
+//            @Override
+//            public void onDataChange(DataSnapshot dataSnapshot) {
+//                // Get Post object and use the values to update the UI
+//                //Owlitem item = dataSnapshot.getValue(Owlitem.class);
+//                // ...
+//                String numItems = String.valueOf(dataSnapshot.getChildrenCount());
+//                Toast.makeText(BasicActivity.this, numItems, Toast.LENGTH_SHORT).show();
+//            }
+//
+//            @Override
+//            public void onCancelled(DatabaseError databaseError) {
+//                // Getting Post failed, log a message
+//                Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
+//                // ...
+//            }
+//        };
+//        query.addValueEventListener(itemListener);
 
         //Query query = mDatabase.child("items").limitToLast(25);
+        //Query query = FirebaseDatabase.getInstance().getReference().child("items").limitToLast(25);
 
         FirebaseRecyclerOptions<Owlitem> options =
                 new FirebaseRecyclerOptions.Builder<Owlitem>()
@@ -247,18 +301,17 @@ public class BasicActivity extends AppCompatActivity implements FirebaseAuth.Aut
                 mEmptyListMessage.setVisibility(getItemCount() == 0 ? View.VISIBLE : View.GONE);
             }
 
-/*
 
-            @Override
-            public void onError(DatabaseError e) {
-                // Called when there is an error getting data. You may want to update
-                // your UI to display an error message to the user.
-                // ...
-            }
-*/
+//            @Override
+//            public void onError(DatabaseError e) {
+//                // Called when there is an error getting data. You may want to update
+//                // your UI to display an error message to the user.
+//                // ...
+//            }
+
 
         };
-    }
+    }*/
 
 
 
@@ -304,16 +357,16 @@ public class BasicActivity extends AppCompatActivity implements FirebaseAuth.Aut
 
         if (requestCode == SET_SEARCH_FILTER) {
             if (resultCode == Activity.RESULT_OK){
-                int searchCat  = (int) data.getExtras().get("searchCategory");
-                String searchText = (String) data.getExtras().get("searchText");
-                Date startDate  = (Date) data.getExtras().get("searchStartDate");
-                Date endDate  = (Date) data.getExtras().get("searchEndDate");
-
-
+                searchCat  = (int) data.getExtras().get("searchCategory");
+                searchText = (String) data.getExtras().get("searchText");
+                searchStartDate  = (Date) data.getExtras().get("searchStartDate");
+                searchEndDate  = (Date) data.getExtras().get("searchEndDate");
+                searchFilterOn = true;
+                fabSearch.setImageResource(R.drawable.ic_cancel_black_24dp);
             }
             else if (resultCode == Activity.RESULT_CANCELED) {
-                //Write your code if there's no result
-                //Toast.makeText(this, "Search set canceled", Toast.LENGTH_SHORT).show();
+                searchFilterOn = false;
+                fabSearch.setImageResource(R.drawable.ic_search_black_24dp);
             }
         }
     }//onActivityResult

@@ -22,6 +22,7 @@ public class Owlitem implements Parcelable{
     static public final int catEntertainment = 7;
     static public final int catOther = 8;*/
 
+    public String itemId;   //this is both a unique key identifier, and the location string in JSON firebase db.
 
     public String username;  //username of who posted it
     public String ownerKey;
@@ -36,7 +37,8 @@ public class Owlitem implements Parcelable{
 
     public Owlitem() {}
 
-    public Owlitem(String username, String ownerKey, String title, String description, String category, long datePosted, String imageLoc) {
+    public Owlitem(String itemId, String username, String ownerKey, String title, String description, String category, long datePosted, String imageLoc) {
+        this.itemId = itemId;
         this.title = title;
         this.username = username;
         this.ownerKey = ownerKey;
@@ -50,6 +52,7 @@ public class Owlitem implements Parcelable{
     @Exclude
     public Map<String, Object> toMap() {
         HashMap<String, Object> result = new HashMap<>();
+        result.put("itemId", itemId);
         result.put("username", username);
         result.put("ownerKey", ownerKey);
         result.put("title", title);
@@ -64,6 +67,7 @@ public class Owlitem implements Parcelable{
 
     // Parcelling part
     public Owlitem(Parcel in){
+        this.itemId = in.readString();
         this.title = in.readString();
         this.username = in.readString();
         this.ownerKey = in.readString();
@@ -82,6 +86,7 @@ public class Owlitem implements Parcelable{
     @Exclude
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(this.itemId);
         dest.writeString(this.title);
         dest.writeString(this.username);
         dest.writeString(this.ownerKey);

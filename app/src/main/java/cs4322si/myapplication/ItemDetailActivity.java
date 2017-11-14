@@ -49,7 +49,7 @@ public class ItemDetailActivity extends AppCompatActivity implements FirebaseAut
 
     private Owlitem currentItem;
 
-    private String itemKey;
+    //private String itemKey;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -113,7 +113,7 @@ public class ItemDetailActivity extends AppCompatActivity implements FirebaseAut
                         // ...
                     }
                 };
-                mDatabase.child("users").child(user.getUid()).child("myMessageList").child(itemKey).addListenerForSingleValueEvent(messageListListener);
+                mDatabase.child("users").child(user.getUid()).child("myMessageList").child(currentItem.itemId).addListenerForSingleValueEvent(messageListListener);
 
             }
             else {
@@ -127,7 +127,7 @@ public class ItemDetailActivity extends AppCompatActivity implements FirebaseAut
     private void startChatActivity (boolean isOwner) {
         Intent i = new Intent(getBaseContext(), ItemChatActivity.class);
         //i.putExtra("isOwner", isOwner);
-        i.putExtra("itemKey", itemKey);
+        //i.putExtra("itemKey", itemKey);
         i.putExtra("currentItem", (Parcelable) currentItem);
         startActivity(i);
     }
@@ -141,8 +141,9 @@ public class ItemDetailActivity extends AppCompatActivity implements FirebaseAut
 
         mDatabase = FirebaseDatabase.getInstance().getReference();
         currentItem = getIntent().getExtras().getParcelable("currentItem");
-        itemKey = (String)getIntent().getExtras().get("itemKey");
 
+        //itemKey = (String)getIntent().getExtras().get("itemKey");
+        //itemKey = currentItem.itemId;
         dTitle.setText("Title: " + currentItem.title);
         dCategory.setText("Category: " + currentItem.category);
         dPoster.setText("Posted by: " + currentItem.username);

@@ -64,5 +64,4 @@
         app:layout_anchorGravity="top|center_horizontal"
         app:srcCompat="@drawable/ic_search_black_24dp" />
 
-
 </android.support.design.widget.CoordinatorLayout>

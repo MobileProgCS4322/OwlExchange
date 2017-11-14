@@ -49,7 +49,7 @@ public class ItemChatActivity extends AppCompatActivity implements FirebaseAuth.
 
     private static final String TAG = "ItemChatActivity";
 
-    private String itemKey;
+    //private String itemKey;
     //private boolean isOwner;
     private Owlitem currentItem;
     private String username;
@@ -82,10 +82,10 @@ public class ItemChatActivity extends AppCompatActivity implements FirebaseAuth.
                 if (!TextUtils.isEmpty(msg)) {
                     String currUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
                     Owlmessage newMsg = new Owlmessage(username, currUserId,
-                            currentItem.username, currentItem.ownerKey, itemKey, currentItem.description, msg);
-                    mDatabase.child("messages").child(itemKey).push().setValue(newMsg);
-                    mDatabase.child("users").child(currentItem.ownerKey).child("myMessageList").child(itemKey).setValue(true);
-                    mDatabase.child("users").child(currUserId).child("myMessageList").child(itemKey).setValue(true);
+                            currentItem.username, currentItem.ownerKey, currentItem.itemId, currentItem.description, msg);
+                    mDatabase.child("messages").child(currentItem.itemId).push().setValue(newMsg);
+                    mDatabase.child("users").child(currentItem.ownerKey).child("myMessageList").child(currentItem.itemId).setValue(true);
+                    mDatabase.child("users").child(currUserId).child("myMessageList").child(currentItem.itemId).setValue(true);
                     mMessageEdit.setText("");
                 }
             }
@@ -118,7 +118,7 @@ public class ItemChatActivity extends AppCompatActivity implements FirebaseAuth.
             };
             mDatabase.child("users").child(user.getUid()).addListenerForSingleValueEvent(userListener);
 
-            itemKey = (String)getIntent().getExtras().get("itemKey");
+            //itemKey = (String)getIntent().getExtras().get("itemKey");
             //isOwner = (boolean)getIntent().getExtras().get("isOwner");
             currentItem = getIntent().getExtras().getParcelable("currentItem");
             attachRecyclerViewAdapter();
@@ -171,7 +171,7 @@ public class ItemChatActivity extends AppCompatActivity implements FirebaseAuth.
 
 
         Query query;
-        query = mDatabase.child("messages").child(itemKey);
+        query = mDatabase.child("messages").child(currentItem.itemId);
 
         //query.addValueEventListener()
 /*        if (isOwner) {  //get all messages

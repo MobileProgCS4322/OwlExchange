@@ -275,7 +275,7 @@ public class PostNewItemActivity extends AppCompatActivity implements FirebaseAu
                             }
                         });
 
-                        Owlitem newItem = new Owlitem(username, ownerKey, title, description, category, currDate, imageLoc);
+                        Owlitem newItem = new Owlitem(itemKey, username, ownerKey, title, description, category, currDate, imageLoc);
                         //Map<String, Object> itemValues = newItem.toMap();
                         //Map<String, Object> childUpdates = new HashMap<>();
                         //childUpdates.put("/items/"+key, childUpdates);
