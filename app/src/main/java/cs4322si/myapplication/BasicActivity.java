@@ -55,6 +55,7 @@ public class BasicActivity extends AppCompatActivity implements FirebaseAuth.Aut
     private List<String> categories;
 
     private Query query;
+    private ValueEventListener myQueryListener;
     //private static final Query query = FirebaseDatabase.getInstance().getReference().child("items").limitToLast(25);
 
 
@@ -74,14 +75,10 @@ public class BasicActivity extends AppCompatActivity implements FirebaseAuth.Aut
         setSupportActionBar(toolbar);
 
         categories = Arrays.asList(getResources().getStringArray(R.array.owlCategories));
-
         mEmptyListMessage = findViewById(R.id.emptyTextView);
 
         mDatabase = FirebaseDatabase.getInstance().getReference();
-
         mRecyclerView = findViewById(R.id.itemsRecycler);
-
-        //final RecyclerView.Adapter adapter = newAdapter();
 
         // Scroll to bottom on new messages
         //adapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
@@ -145,7 +142,6 @@ public class BasicActivity extends AppCompatActivity implements FirebaseAuth.Aut
                 }
             }
         });
-
     }
 
     @Override
@@ -154,8 +150,12 @@ public class BasicActivity extends AppCompatActivity implements FirebaseAuth.Aut
         if (isSignedIn()) {
             storage = FirebaseStorage.getInstance();
             attachRecyclerViewAdapter();
+            FirebaseAuth.getInstance().addAuthStateListener(this);
         }
-        FirebaseAuth.getInstance().addAuthStateListener(this);
+        else {
+            startActivity(new Intent(getBaseContext(), StartActivity.class));
+            finish();
+        }
     }
 
     @Override
@@ -172,20 +172,21 @@ public class BasicActivity extends AppCompatActivity implements FirebaseAuth.Aut
         }
     }
 
-
     private void attachRecyclerViewAdapter() {
+
+        if (myQueryListener != null) {
+            query.removeEventListener(myQueryListener);
+        }
 
         if (!searchFilterOn) {
             query = mDatabase.child("items");
-        }
-        else {
+        } else {
             if (searchStartDate != null) {
                 if (searchEndDate == null) {        //filter by start date
                     //Toast.makeText(this, Long.toString(searchStartDate.getTime()), Toast.LENGTH_SHORT).show();
                     query = mDatabase.child("items").orderByChild("datePosted").startAt(searchStartDate.getTime());
                     //Toast.makeText(this, "Dates selected", Toast.LENGTH_SHORT).show();
-                }
-                else {                              //filter by start date and end date
+                } else {                              //filter by start date and end date
                     //add a day to the end date (we want everything before this date)
                     Calendar c = Calendar.getInstance();
                     c.setTime(searchEndDate);
@@ -194,8 +195,7 @@ public class BasicActivity extends AppCompatActivity implements FirebaseAuth.Aut
 
                     query = mDatabase.child("items").orderByChild("datePosted").startAt(searchStartDate.getTime()).endAt(realSearchEndDate);
                 }
-            }
-            else if (searchEndDate != null) {       //filter by end date
+            } else if (searchEndDate != null) {       //filter by end date
                 //add a day to the end date (we want everything before this date)
                 Calendar c = Calendar.getInstance();
                 c.setTime(searchEndDate);
@@ -203,17 +203,15 @@ public class BasicActivity extends AppCompatActivity implements FirebaseAuth.Aut
                 long realSearchEndDate = c.getTimeInMillis();
 
                 query = mDatabase.child("items").orderByChild("datePosted").endAt(realSearchEndDate);
-            }
-            else if (searchCat != 0) { //filter by category
+            } else if (searchCat != 0) { //filter by category
                 query = mDatabase.child("items").orderByChild("category").equalTo(categories.get(searchCat));
-            }
-            else {  //filter exists, but it's not category or date - must be a search string.
+            } else {  //filter exists, but it's not category or date - must be a search string.
                 //Toast.makeText(this, "No dates selected", Toast.LENGTH_SHORT).show();
                 query = mDatabase.child("items");
             }
         }
 
-        query.addValueEventListener(new ValueEventListener() {
+        myQueryListener = query.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 //Toast.makeText(getBaseContext(), "calling onDataChange", Toast.LENGTH_SHORT).show();
@@ -225,8 +223,7 @@ public class BasicActivity extends AppCompatActivity implements FirebaseAuth.Aut
 
                     if (!searchFilterOn) {
                         owlitemList.add(item);
-                    }
-                    else if ((searchStartDate != null) || (searchEndDate != null)) {
+                    } else if ((searchStartDate != null) || (searchEndDate != null)) {
                         //filtered on date search
                         //need to check if there is a category search and a keyword search.
                         if (searchCat == 0) {
@@ -235,19 +232,16 @@ public class BasicActivity extends AppCompatActivity implements FirebaseAuth.Aut
                                         item.description.toLowerCase().contains(searchText)) {
                                     owlitemList.add(item);
                                 }
-                            }
-                            else {
+                            } else {
                                 owlitemList.add(item);
                             }
-                        }
-                        else {
+                        } else {
                             //there is a category search
                             if (searchText.length() == 0) {     //no keyword search
                                 if (item.category.equals(categories.get(searchCat))) {
                                     owlitemList.add(item);
                                 }
-                            }
-                            else {                  //category AND keyword search
+                            } else {                  //category AND keyword search
                                 if ((item.category.equals(categories.get(searchCat))) &&
                                         (item.title.toLowerCase().contains(searchText) ||
                                                 item.description.toLowerCase().contains(searchText))) {
@@ -255,8 +249,7 @@ public class BasicActivity extends AppCompatActivity implements FirebaseAuth.Aut
                                 }
                             }
                         }
-                    }
-                    else if (searchCat != 0) {
+                    } else if (searchCat != 0) {
                         //no dates.  filtered on category.
                         //need to check if there is a category search
                         if (searchText.length() != 0) {
@@ -264,20 +257,16 @@ public class BasicActivity extends AppCompatActivity implements FirebaseAuth.Aut
                                     item.description.toLowerCase().contains(searchText)) {
                                 owlitemList.add(item);
                             }
-                        }
-                        else {
+                        } else {
                             owlitemList.add(item);
                         }
-                    }
-                    else {
+                    } else {
                         //no date, no category.  filter on keyword
                         if (item.title.toLowerCase().contains(searchText) ||
                                 item.description.toLowerCase().contains(searchText)) {
                             owlitemList.add(item);
                         }
-
                     }
-
                 }
                 owlitemAdapter = new OwlitemAdapter(owlitemList);
                 mRecyclerView.setAdapter(owlitemAdapter);
@@ -290,114 +279,7 @@ public class BasicActivity extends AppCompatActivity implements FirebaseAuth.Aut
                 // ...
             }
         });
-
-        //owlitemAdapter = new OwlitemAdapter()
-
-        //RecyclerView.Adapter adapter = newAdapter();
-        //owlitemAdapter = newAdapter();
-        // Scroll to bottom on new messages
-        //adapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
-        //    @Override
-        //    public void onItemRangeInserted(int positionStart, int itemCount) {
-        //        mRecyclerView.smoothScrollToPosition(adapter.getItemCount());
-        //    }
-        //});
-
     }
-
- /*   protected FirebaseRecyclerAdapter newAdapter() {
-
-//        //code to check if query/recycler was being loaded with items
-//        ValueEventListener itemListener = new ValueEventListener() {
-//            @Override
-//            public void onDataChange(DataSnapshot dataSnapshot) {
-//                // Get Post object and use the values to update the UI
-//                //Owlitem item = dataSnapshot.getValue(Owlitem.class);
-//                // ...
-//                String numItems = String.valueOf(dataSnapshot.getChildrenCount());
-//                Toast.makeText(BasicActivity.this, numItems, Toast.LENGTH_SHORT).show();
-//            }
-//
-//            @Override
-//            public void onCancelled(DatabaseError databaseError) {
-//                // Getting Post failed, log a message
-//                Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
-//                // ...
-//            }
-//        };
-//        query.addValueEventListener(itemListener);
-
-        //Query query = mDatabase.child("items").limitToLast(25);
-        //Query query = FirebaseDatabase.getInstance().getReference().child("items").limitToLast(25);
-
-        FirebaseRecyclerOptions<Owlitem> options =
-                new FirebaseRecyclerOptions.Builder<Owlitem>()
-                        .setQuery(query, Owlitem.class)
-                        .setLifecycleOwner(this)
-                        .build();
-
-
-        return new FirebaseRecyclerAdapter<Owlitem, OwlitemHolder>(options) {
-            @Override
-            public OwlitemHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-                // Create a new instance of the ViewHolder, in this case we are using a custom
-                // layout called R.layout.message for each item
-                View view = LayoutInflater.from(parent.getContext())
-                        .inflate(R.layout.itemlayout, parent, false);
-
-                return new OwlitemHolder(view);
-            }
-
-            @Override
-            protected void onBindViewHolder(final OwlitemHolder holder, int position, final Owlitem model) {
-                // Bind the Owlitem object to the holder
-                holder.bind(model, storage, getBaseContext());
-
-                holder.setOnClickListener(new OwlitemHolder.ClickListener() {
-                    @Override
-                    public void onItemClick(View view, int position) {
-                        //Toast.makeText(getBaseContext(), model.category, Toast.LENGTH_SHORT).show();
-
-                        DatabaseReference itemRef = getRef(position);
-                        String itemKey = itemRef.getKey();
-                        Intent i = new Intent(getBaseContext(), ItemDetailActivity.class);
-                        i.putExtra("currentItem", (Parcelable) model);
-                        i.putExtra("itemKey", itemKey);
-                        //BitmapDrawable drawable = (BitmapDrawable) holder.mPicture.getDrawable();
-                        //Bitmap bitmap = drawable.getBitmap();
-
-                        //Drawable dr = holder.mPicture.getDrawable();
-                        //Bitmap bmp =  ((GlideBitmapDrawable)dr.getCurrent()).getBitmap();
-                        //i.putExtra("mainPicture", bmp);
-
-                        startActivity(i);
-                    }
-
-                   @Override
-                    public void onItemLongClick(View view, int position) {
-                        //Toast.makeText(getBaseContext(), "Item long clicked at " + position, Toast.LENGTH_SHORT).show();
-                    }
-                });
-            }
-
-            @Override
-            public void onDataChanged() {
-                // If there are no items, show a view that invites the user to add an item.
-                mEmptyListMessage.setVisibility(getItemCount() == 0 ? View.VISIBLE : View.GONE);
-            }
-
-
-//            @Override
-//            public void onError(DatabaseError e) {
-//                // Called when there is an error getting data. You may want to update
-//                // your UI to display an error message to the user.
-//                // ...
-//            }
-
-
-        };
-    }*/
-
 
 
     private boolean isSignedIn() {
