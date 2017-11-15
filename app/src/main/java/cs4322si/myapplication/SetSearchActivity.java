@@ -53,7 +53,7 @@ public class SetSearchActivity extends AppCompatActivity implements FirebaseAuth
         switch (view.getId()) {
             case R.id.btnSearch:
                 int catNumber = mCategory.getSelectedItemPosition();
-                String searchText = mSearchText.getText().toString();
+                String searchText = mSearchText.getText().toString().trim().toLowerCase();
 
                 Date startDate, endDate;
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
@@ -69,7 +69,7 @@ public class SetSearchActivity extends AppCompatActivity implements FirebaseAuth
                 }
 
 
-                if ((catNumber == 0) && (TextUtils.isEmpty(searchText)) && (endDate == null) && (startDate == null)) {
+                if ((catNumber == 0) && (searchText.length() == 0) && (endDate == null) && (startDate == null)) {
                     Toast.makeText(this, "No search parameters detected.  Please select at least one search parameter, or click Cancel.", Toast.LENGTH_LONG).show();
                 }
                 else {

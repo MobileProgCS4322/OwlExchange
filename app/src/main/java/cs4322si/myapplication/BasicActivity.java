@@ -34,6 +34,7 @@ import com.google.firebase.storage.FirebaseStorage;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -48,11 +49,12 @@ public class BasicActivity extends AppCompatActivity implements FirebaseAuth.Aut
     private RecyclerView mRecyclerView;
     //private FirebaseRecyclerAdapter  adapter;
     private OwlitemAdapter owlitemAdapter;
-    private Query query;
+
     private ArrayList<Owlitem> owlitemList = new ArrayList<>();
 
     private List<String> categories;
 
+    private Query query;
     //private static final Query query = FirebaseDatabase.getInstance().getReference().child("items").limitToLast(25);
 
 
@@ -177,22 +179,105 @@ public class BasicActivity extends AppCompatActivity implements FirebaseAuth.Aut
             query = mDatabase.child("items");
         }
         else {
-            if (searchCat==0) {     //no category selected
-                query = mDatabase.child("items");
+            if (searchStartDate != null) {
+                if (searchEndDate == null) {        //filter by start date
+                    //Toast.makeText(this, Long.toString(searchStartDate.getTime()), Toast.LENGTH_SHORT).show();
+                    query = mDatabase.child("items").orderByChild("datePosted").startAt(searchStartDate.getTime());
+                    //Toast.makeText(this, "Dates selected", Toast.LENGTH_SHORT).show();
+                }
+                else {                              //filter by start date and end date
+                    //add a day to the end date (we want everything before this date)
+                    Calendar c = Calendar.getInstance();
+                    c.setTime(searchEndDate);
+                    c.add(Calendar.DATE, 1);  // number of days to add
+                    long realSearchEndDate = c.getTimeInMillis();
+
+                    query = mDatabase.child("items").orderByChild("datePosted").startAt(searchStartDate.getTime()).endAt(realSearchEndDate);
+                }
             }
-            else {
+            else if (searchEndDate != null) {       //filter by end date
+                //add a day to the end date (we want everything before this date)
+                Calendar c = Calendar.getInstance();
+                c.setTime(searchEndDate);
+                c.add(Calendar.DATE, 1);  // number of days to add
+                long realSearchEndDate = c.getTimeInMillis();
+
+                query = mDatabase.child("items").orderByChild("datePosted").endAt(realSearchEndDate);
+            }
+            else if (searchCat != 0) { //filter by category
                 query = mDatabase.child("items").orderByChild("category").equalTo(categories.get(searchCat));
             }
+            else {  //filter exists, but it's not category or date - must be a search string.
+                //Toast.makeText(this, "No dates selected", Toast.LENGTH_SHORT).show();
+                query = mDatabase.child("items");
+            }
         }
+
         query.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+                //Toast.makeText(getBaseContext(), "calling onDataChange", Toast.LENGTH_SHORT).show();
                 mEmptyListMessage.setVisibility(!dataSnapshot.hasChildren() ? View.VISIBLE : View.GONE);
 
                 owlitemList = new ArrayList<>();
                 for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                     Owlitem item = postSnapshot.getValue(Owlitem.class);
-                    owlitemList.add(item);
+
+                    if (!searchFilterOn) {
+                        owlitemList.add(item);
+                    }
+                    else if ((searchStartDate != null) || (searchEndDate != null)) {
+                        //filtered on date search
+                        //need to check if there is a category search and a keyword search.
+                        if (searchCat == 0) {
+                            if (searchText.length() != 0) {
+                                if (item.title.toLowerCase().contains(searchText) ||
+                                        item.description.toLowerCase().contains(searchText)) {
+                                    owlitemList.add(item);
+                                }
+                            }
+                            else {
+                                owlitemList.add(item);
+                            }
+                        }
+                        else {
+                            //there is a category search
+                            if (searchText.length() == 0) {     //no keyword search
+                                if (item.category.equals(categories.get(searchCat))) {
+                                    owlitemList.add(item);
+                                }
+                            }
+                            else {                  //category AND keyword search
+                                if ((item.category.equals(categories.get(searchCat))) &&
+                                        (item.title.toLowerCase().contains(searchText) ||
+                                                item.description.toLowerCase().contains(searchText))) {
+                                    owlitemList.add(item);
+                                }
+                            }
+                        }
+                    }
+                    else if (searchCat != 0) {
+                        //no dates.  filtered on category.
+                        //need to check if there is a category search
+                        if (searchText.length() != 0) {
+                            if (item.title.toLowerCase().contains(searchText) ||
+                                    item.description.toLowerCase().contains(searchText)) {
+                                owlitemList.add(item);
+                            }
+                        }
+                        else {
+                            owlitemList.add(item);
+                        }
+                    }
+                    else {
+                        //no date, no category.  filter on keyword
+                        if (item.title.toLowerCase().contains(searchText) ||
+                                item.description.toLowerCase().contains(searchText)) {
+                            owlitemList.add(item);
+                        }
+
+                    }
+
                 }
                 owlitemAdapter = new OwlitemAdapter(owlitemList);
                 mRecyclerView.setAdapter(owlitemAdapter);
