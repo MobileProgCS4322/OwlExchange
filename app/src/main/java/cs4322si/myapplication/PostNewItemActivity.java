@@ -52,7 +52,7 @@ import java.util.Map;
 
 public class PostNewItemActivity extends AppCompatActivity implements FirebaseAuth.AuthStateListener{
 
-    private Button btnCamera, btnPost;
+    private Button btnCamera, btnPost, btnLoadPicture;
     private Spinner mCategory;
     private EditText mItemTitle, mDescription;
     private ImageView mPicture;
@@ -68,6 +68,7 @@ public class PostNewItemActivity extends AppCompatActivity implements FirebaseAu
 
     //private static final int REQUEST_IMAGE_CAPTURE = 456;
     private static final int REQUEST_IMAGE_FILESAVE = 789;
+    private static final int SELECT_PICTURE = 888;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,6 +92,7 @@ public class PostNewItemActivity extends AppCompatActivity implements FirebaseAu
 
         btnCamera = (Button)findViewById(R.id.btnTakePicture);
         btnPost = (Button)findViewById(R.id.btnPost);
+        btnLoadPicture = (Button)findViewById(R.id.btnLoadPicture);
 
         btnCamera.setOnClickListener(new Button.OnClickListener() {
             @Override
@@ -103,6 +105,13 @@ public class PostNewItemActivity extends AppCompatActivity implements FirebaseAu
             @Override
             public void onClick(View v) {
                 submitPost();
+            }
+        });
+
+        btnLoadPicture.setOnClickListener(new Button.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dispatchLoadPictureIntent();
             }
         });
 
@@ -153,6 +162,15 @@ public class PostNewItemActivity extends AppCompatActivity implements FirebaseAu
         }
     }
 
+    private void dispatchLoadPictureIntent() {
+        Intent intent = new Intent();
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(Intent.createChooser(intent, "Select Picture"), SELECT_PICTURE);
+    }
+
+
+
     private File createImageFile() throws IOException {
         // Create an image file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
@@ -192,8 +210,23 @@ public class PostNewItemActivity extends AppCompatActivity implements FirebaseAu
                     //mPicture.setImageBitmap(myBitmap);
                     mPicture.setBackgroundColor(Color.WHITE);
                 }
-
             }
+            else if (requestCode == SELECT_PICTURE) {
+               if (data != null) {
+                   Glide.with(this)
+                           .load(data.getData())
+                           .asBitmap()
+                           .into(new SimpleTarget<Bitmap>() {
+                               @Override
+                               public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
+                                   mPicture.setImageBitmap(resource);
+                                   theImageBitmap = resource;
+                               }
+                           });
+
+                   mPicture.setBackgroundColor(Color.WHITE);
+               }
+           }
         }
     }
 
@@ -311,12 +344,8 @@ public class PostNewItemActivity extends AppCompatActivity implements FirebaseAu
                         // ...
                     }
                 };
-
                 mDatabase.child("users").child(ownerKey).addListenerForSingleValueEvent(userListener);
-
-
             }
         }
-
     }
 }
