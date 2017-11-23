@@ -49,7 +49,6 @@ public class BasicActivity extends AppCompatActivity implements FirebaseAuth.Aut
     private RecyclerView mRecyclerView;
     //private FirebaseRecyclerAdapter  adapter;
     private OwlitemAdapter owlitemAdapter;
-
     private ArrayList<Owlitem> owlitemList = new ArrayList<>();
 
     private List<String> categories;

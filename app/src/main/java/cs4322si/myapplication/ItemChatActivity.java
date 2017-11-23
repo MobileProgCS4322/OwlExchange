@@ -35,6 +35,7 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
 
 public class ItemChatActivity extends AppCompatActivity implements FirebaseAuth.AuthStateListener {
 
@@ -43,7 +44,13 @@ public class ItemChatActivity extends AppCompatActivity implements FirebaseAuth.
     private Button sendButton;
 
     private RecyclerView mRecyclerView;
-    private FirebaseRecyclerAdapter adapter;
+    //private FirebaseRecyclerAdapter adapter;
+    private OwlmessageAdapter owlmessageAdapter;
+    private ArrayList<Owlmessage> owlmessageList = new ArrayList<>();
+
+    private Query query;
+    private ValueEventListener myQueryListener;
+
     private DatabaseReference mDatabase;
     private FirebaseAuth auth;
 
@@ -123,9 +130,7 @@ public class ItemChatActivity extends AppCompatActivity implements FirebaseAuth.
             currentItem = getIntent().getExtras().getParcelable("currentItem");
             attachRecyclerViewAdapter();
         }
-
     }
-
 
     @Override
     protected void onStop() {
@@ -147,21 +152,65 @@ public class ItemChatActivity extends AppCompatActivity implements FirebaseAuth.
 
 
     private void attachRecyclerViewAdapter() {
-        //RecyclerView.Adapter adapter = newAdapter();
-        adapter = newAdapter();
+
+        owlmessageAdapter = new OwlmessageAdapter(owlmessageList);
+        mRecyclerView.setAdapter(owlmessageAdapter);
 
         // Scroll to bottom on new messages
-        adapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
+        owlmessageAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
             @Override
             public void onItemRangeInserted(int positionStart, int itemCount) {
-                mRecyclerView.smoothScrollToPosition(adapter.getItemCount());
+                mRecyclerView.smoothScrollToPosition(owlmessageAdapter.getItemCount());
             }
         });
 
-        mRecyclerView.setAdapter(adapter);
+        if (myQueryListener != null) {
+            query.removeEventListener(myQueryListener);
+        }
+
+        query = mDatabase.child("messages").child(currentItem.itemId);
+        myQueryListener = query.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                owlmessageList = new ArrayList<>();
+
+                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                String currUserId = user.getUid();
+
+
+                for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                    Owlmessage owlmessage = postSnapshot.getValue(Owlmessage.class);
+
+                    //if the current user is the owner of the item - show all the messages.
+                    if (currUserId.equals(currentItem.ownerKey)) {
+                        owlmessageList.add(owlmessage);
+                    }
+                    //otherwise, only show messages sent by or to the current user. OR if message sent by owner to owner (everyone)
+                    else if ((currUserId.equals(owlmessage.senderUserid)) ||
+                            (currUserId.equals(owlmessage.receiverUserid)) ||
+                            (currentItem.ownerKey.equals(owlmessage.senderUserid) && currentItem.ownerKey.equals(owlmessage.receiverUserid)))
+                    {
+                        owlmessageList.add(owlmessage);
+                    }
+                }
+
+                //Toast.makeText(getBaseContext(), "number of messages: " + owlmessageList.size(), Toast.LENGTH_SHORT).show();
+
+                // If there are no messages, show a view that invites the user to add a message.
+                mEmptyListMessage.setVisibility(owlmessageList.size() == 0 ? View.VISIBLE : View.GONE);
+
+                owlmessageAdapter.updateList(owlmessageList);
+                owlmessageAdapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 
-    protected FirebaseRecyclerAdapter newAdapter() {
+/*    protected FirebaseRecyclerAdapter newAdapter() {
 
         //private static final Query query = FirebaseDatabase.getInstance().getReference().child("items").limitToLast(25);
         //Query query = mDatabase.child("items").limitToLast(25);
@@ -169,17 +218,16 @@ public class ItemChatActivity extends AppCompatActivity implements FirebaseAuth.
         auth = FirebaseAuth.getInstance();
         FirebaseUser user = auth.getCurrentUser();
 
-
         Query query;
         query = mDatabase.child("messages").child(currentItem.itemId);
 
         //query.addValueEventListener()
-/*        if (isOwner) {  //get all messages
+//        if (isOwner) {  //get all messages
 
-        }
-        else {
-            query = mDatabase.child("messages").child(itemKey);
-        }*/
+//        }
+//        else {
+//            query = mDatabase.child("messages").child(itemKey);
+//        }
 
         FirebaseRecyclerOptions<Owlmessage> options =
                 new FirebaseRecyclerOptions.Builder<Owlmessage>()
@@ -211,18 +259,15 @@ public class ItemChatActivity extends AppCompatActivity implements FirebaseAuth.
                 mEmptyListMessage.setVisibility(getItemCount() == 0 ? View.VISIBLE : View.GONE);
             }
 
-/*
-
-            @Override
-            public void onError(DatabaseError e) {
+            //@Override
+            //public void onError(DatabaseError e) {
                 // Called when there is an error getting data. You may want to update
                 // your UI to display an error message to the user.
                 // ...
-            }
-*/
+            //}
 
         };
-    }
+    }*/
 
 
 
