@@ -16,6 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -42,6 +43,7 @@ public class ItemChatActivity extends AppCompatActivity implements FirebaseAuth.
     private TextView mEmptyListMessage;
     private EditText mMessageEdit;
     private Button sendButton;
+    private Spinner sendToSpinner;
 
     private RecyclerView mRecyclerView;
     //private FirebaseRecyclerAdapter adapter;
@@ -60,7 +62,7 @@ public class ItemChatActivity extends AppCompatActivity implements FirebaseAuth.
     //private boolean isOwner;
     private Owlitem currentItem;
     private String username;
-
+    private String currUserId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,6 +70,8 @@ public class ItemChatActivity extends AppCompatActivity implements FirebaseAuth.
         setContentView(R.layout.activity_item_chat);
 
         mEmptyListMessage = findViewById(R.id.emptyChatView);
+
+        sendToSpinner = findViewById(R.id.sendToSpinner);
 
         mDatabase = FirebaseDatabase.getInstance().getReference();
         //auth = FirebaseAuth.getInstance();
@@ -87,7 +91,7 @@ public class ItemChatActivity extends AppCompatActivity implements FirebaseAuth.
 
                 String msg = mMessageEdit.getText().toString();
                 if (!TextUtils.isEmpty(msg)) {
-                    String currUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+                    //String currUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
                     Owlmessage newMsg = new Owlmessage(username, currUserId,
                             currentItem.username, currentItem.ownerKey, currentItem.itemId, currentItem.description, msg);
                     mDatabase.child("messages").child(currentItem.itemId).push().setValue(newMsg);
@@ -108,8 +112,8 @@ public class ItemChatActivity extends AppCompatActivity implements FirebaseAuth.
 
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user != null) {
-
-              ValueEventListener userListener = new ValueEventListener() {
+            currUserId = user.getUid();
+            ValueEventListener userListener = new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     Owluser currUser = dataSnapshot.getValue(Owluser.class);
@@ -129,6 +133,18 @@ public class ItemChatActivity extends AppCompatActivity implements FirebaseAuth.
             //isOwner = (boolean)getIntent().getExtras().get("isOwner");
             currentItem = getIntent().getExtras().getParcelable("currentItem");
             attachRecyclerViewAdapter();
+
+            if (currUserId.equals(currentItem.ownerKey)) {
+                sendToSpinner.setVisibility(View.VISIBLE);
+            }
+            else {
+                sendToSpinner.setVisibility(View.GONE);
+            }
+
+        }
+        else {
+            startActivity(new Intent(getBaseContext(), StartActivity.class));
+            finish();
         }
     }
 
@@ -174,10 +190,6 @@ public class ItemChatActivity extends AppCompatActivity implements FirebaseAuth.
             public void onDataChange(DataSnapshot dataSnapshot) {
                 owlmessageList = new ArrayList<>();
 
-                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-                String currUserId = user.getUid();
-
-
                 for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                     Owlmessage owlmessage = postSnapshot.getValue(Owlmessage.class);
 
@@ -200,7 +212,6 @@ public class ItemChatActivity extends AppCompatActivity implements FirebaseAuth.
                 mEmptyListMessage.setVisibility(owlmessageList.size() == 0 ? View.VISIBLE : View.GONE);
 
                 owlmessageAdapter.updateList(owlmessageList);
-                owlmessageAdapter.notifyDataSetChanged();
             }
 
             @Override

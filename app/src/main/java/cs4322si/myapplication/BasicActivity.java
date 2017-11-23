@@ -176,7 +176,6 @@ public class BasicActivity extends AppCompatActivity implements FirebaseAuth.Aut
         if (myQueryListener != null) {
             query.removeEventListener(myQueryListener);
         }
-
         if (!searchFilterOn) {
             query = mDatabase.child("items");
         } else {
@@ -209,6 +208,9 @@ public class BasicActivity extends AppCompatActivity implements FirebaseAuth.Aut
                 query = mDatabase.child("items");
             }
         }
+
+        owlitemAdapter = new OwlitemAdapter(owlitemList);
+        mRecyclerView.setAdapter(owlitemAdapter);
 
         myQueryListener = query.addValueEventListener(new ValueEventListener() {
             @Override
@@ -267,8 +269,8 @@ public class BasicActivity extends AppCompatActivity implements FirebaseAuth.Aut
                         }
                     }
                 }
-                owlitemAdapter = new OwlitemAdapter(owlitemList);
-                mRecyclerView.setAdapter(owlitemAdapter);
+
+                owlitemAdapter.updateList(owlitemList);
             }
 
             @Override

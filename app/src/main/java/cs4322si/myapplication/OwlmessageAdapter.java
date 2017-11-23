@@ -117,9 +117,9 @@ public class OwlmessageAdapter extends RecyclerView.Adapter<OwlmessageAdapter.Ow
         }
     }
 
-
     public void updateList(List<Owlmessage> owlmessageList) {
         this.owlmessageList = owlmessageList;
+        notifyDataSetChanged();
     }
 
 }

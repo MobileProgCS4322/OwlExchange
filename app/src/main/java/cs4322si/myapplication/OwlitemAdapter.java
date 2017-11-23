@@ -111,4 +111,9 @@ public class OwlitemAdapter extends RecyclerView.Adapter<OwlitemAdapter.OwlitemH
         return owlitemList.size();
     }
 
+    public void updateList(List<Owlitem> owlitemList) {
+        this.owlitemList = owlitemList;
+        notifyDataSetChanged();
+    }
+
 }

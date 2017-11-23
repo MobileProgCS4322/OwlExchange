@@ -16,42 +16,59 @@
     <android.support.v7.widget.RecyclerView
         android:id="@+id/messagesList"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_alignParentStart="true"
+        android:layout_height="0dp"
         android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
+        android:layout_above="@+id/footerCapsule"
         android:clipToPadding="false"
         android:padding="16dp"
         tools:listitem="@layout/message" />
 
     <LinearLayout
-        android:id="@+id/footer"
+        android:id="@+id/footerCapsule"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentBottom="true"
-        android:paddingStart="16dp"
+        android:orientation="vertical"
         android:paddingEnd="16dp"
         android:paddingLeft="16dp"
-        android:orientation="horizontal">
+        android:paddingStart="16dp"
+        >
 
-        <EditText
-            android:id="@+id/messageEdit"
-            android:layout_width="0dp"
+
+        <Spinner
+            android:id="@+id/sendToSpinner"
+            android:layout_width="250dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:imeOptions="actionDone"
-            android:inputType="text" />
+            android:layout_gravity="start"
+            android:visibility="gone" />
 
-        <Button
-            android:id="@+id/sendButton"
-            style="@style/Widget.AppCompat.Button.Borderless.Colored"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:id="@+id/footer"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="bottom|end"
-            android:text="@string/send" />
+            android:orientation="horizontal">
 
+            <EditText
+                android:id="@+id/messageEdit"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:imeOptions="actionDone"
+                android:inputType="text" />
+
+            <Button
+                android:id="@+id/sendButton"
+                style="@style/Widget.AppCompat.Button.Borderless.Colored"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|end"
+                android:text="@string/send" />
+
+        </LinearLayout>
     </LinearLayout>
 
 </RelativeLayout>

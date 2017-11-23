@@ -97,7 +97,9 @@ public class ItemDetailActivity extends AppCompatActivity implements FirebaseAut
                 ValueEventListener messageListListener = new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
-                        if (dataSnapshot.hasChildren()) {
+
+                        if (dataSnapshot.exists()) {
+                        //if (dataSnapshot.hasChildren()) {
                             //open the messageScreen.
                             startChatActivity(true);
                         }
