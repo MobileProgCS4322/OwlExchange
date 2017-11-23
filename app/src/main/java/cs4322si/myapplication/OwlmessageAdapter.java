@@ -55,7 +55,7 @@ public class OwlmessageAdapter extends RecyclerView.Adapter<OwlmessageAdapter.Ow
         public void bind(Owlmessage msg) {
 
             FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-            mNameField.setText(msg.senderUsername);
+            mNameField.setText(msg.senderUsername + "->" + msg.receiverUsername);
             mTextField.setText(msg.message);
 
             Date timestamp = new Date(msg.timestamp);

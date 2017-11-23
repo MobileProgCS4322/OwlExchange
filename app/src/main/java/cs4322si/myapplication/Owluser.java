@@ -1,6 +1,6 @@
 package cs4322si.myapplication;
 
-//this class not really used yet - placeholder
+//not used yet.  placeholder
 
 import java.util.HashMap;
 import java.util.Map;
@@ -8,7 +8,9 @@ import java.util.Map;
 public class Owluser {
 
     public String username;
-    public Map<String, Boolean> myItems = new HashMap<>();
+    public String userid;
+
+    //public Map<String, Boolean> myItems = new HashMap<>();
 
     //private String firstname;
     //private String lastname;
@@ -18,8 +20,9 @@ public class Owluser {
 
     }
 
-    public Owluser(String username) {
+    public Owluser(String username, String userid) {
         this.username = username;
+        this.userid = userid;
     }
 
 }

@@ -14,6 +14,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
@@ -37,18 +38,26 @@ import com.google.firebase.storage.UploadTask;
 
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ItemChatActivity extends AppCompatActivity implements FirebaseAuth.AuthStateListener {
 
     private TextView mEmptyListMessage;
     private EditText mMessageEdit;
     private Button sendButton;
-    private Spinner sendToSpinner;
+    private Spinner mSendToSpinner;
 
     private RecyclerView mRecyclerView;
     //private FirebaseRecyclerAdapter adapter;
     private OwlmessageAdapter owlmessageAdapter;
     private ArrayList<Owlmessage> owlmessageList = new ArrayList<>();
+
+    private ArrayList<String> usernamelist;
+    private HashMap<String, String> usernameToIdMap;
+    ArrayAdapter<String> sendToAdapter;
 
     private Query query;
     private ValueEventListener myQueryListener;
@@ -71,7 +80,7 @@ public class ItemChatActivity extends AppCompatActivity implements FirebaseAuth.
 
         mEmptyListMessage = findViewById(R.id.emptyChatView);
 
-        sendToSpinner = findViewById(R.id.sendToSpinner);
+        mSendToSpinner = findViewById(R.id.sendToSpinner);
 
         mDatabase = FirebaseDatabase.getInstance().getReference();
         //auth = FirebaseAuth.getInstance();
@@ -91,14 +100,34 @@ public class ItemChatActivity extends AppCompatActivity implements FirebaseAuth.
 
                 String msg = mMessageEdit.getText().toString();
                 if (!TextUtils.isEmpty(msg)) {
-                    //String currUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-                    Owlmessage newMsg = new Owlmessage(username, currUserId,
-                            currentItem.username, currentItem.ownerKey, currentItem.itemId, currentItem.description, msg);
-                    mDatabase.child("messages").child(currentItem.itemId).push().setValue(newMsg);
-                    mDatabase.child("users").child(currentItem.ownerKey).child("myMessageList").child(currentItem.itemId).setValue(true);
-                    mDatabase.child("users").child(currUserId).child("myMessageList").child(currentItem.itemId).setValue(true);
-                    mMessageEdit.setText("");
+                    Owlmessage newMsg = null;
+                    if (currUserId.equals(currentItem.ownerKey)) {
+                        if (mSendToSpinner.getSelectedItemPosition() <= 0) {
+                            Toast.makeText(getBaseContext(), "Please select a message recipient.", Toast.LENGTH_SHORT).show();
+                        }
+                        else {
+                            String recipientUsername = mSendToSpinner.getSelectedItem().toString();
+                            String recipientUserid = usernameToIdMap.get(recipientUsername);
+                            newMsg = new Owlmessage(username, currUserId,
+                                    recipientUsername, recipientUserid, currentItem.itemId, currentItem.description, msg);
+                        }
+                    }
+                    else {
+                        newMsg = new Owlmessage(username, currUserId,
+                                currentItem.username, currentItem.ownerKey, currentItem.itemId, currentItem.description, msg);
+                    }
+
+                    if (newMsg != null) {
+                        mDatabase.child("messages").child(currentItem.itemId).push().setValue(newMsg);
+                        mDatabase.child("users").child(currentItem.ownerKey).child("myMessageList").child(currentItem.itemId).setValue(true);
+                        mDatabase.child("users").child(currUserId).child("myMessageList").child(currentItem.itemId).setValue(true);
+                        mMessageEdit.setText("");
+                    }
                 }
+                else {
+                    Toast.makeText(getBaseContext(), "Please enter a message.", Toast.LENGTH_SHORT).show();
+                }
+
             }
         });
 
@@ -135,12 +164,11 @@ public class ItemChatActivity extends AppCompatActivity implements FirebaseAuth.
             attachRecyclerViewAdapter();
 
             if (currUserId.equals(currentItem.ownerKey)) {
-                sendToSpinner.setVisibility(View.VISIBLE);
+                mSendToSpinner.setVisibility(View.VISIBLE);
             }
             else {
-                sendToSpinner.setVisibility(View.GONE);
+                mSendToSpinner.setVisibility(View.GONE);
             }
-
         }
         else {
             startActivity(new Intent(getBaseContext(), StartActivity.class));
@@ -172,13 +200,14 @@ public class ItemChatActivity extends AppCompatActivity implements FirebaseAuth.
         owlmessageAdapter = new OwlmessageAdapter(owlmessageList);
         mRecyclerView.setAdapter(owlmessageAdapter);
 
-        // Scroll to bottom on new messages
+/*        // Scroll to bottom on new messages
         owlmessageAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
             @Override
             public void onItemRangeInserted(int positionStart, int itemCount) {
-                mRecyclerView.smoothScrollToPosition(owlmessageAdapter.getItemCount());
+                Toast.makeText(getBaseContext(), "scrolling to bottom?", Toast.LENGTH_SHORT).show();
+                mRecyclerView.smoothScrollToPosition(owlmessageAdapter.getItemCount() - 1);
             }
-        });
+        });*/
 
         if (myQueryListener != null) {
             query.removeEventListener(myQueryListener);
@@ -190,12 +219,30 @@ public class ItemChatActivity extends AppCompatActivity implements FirebaseAuth.
             public void onDataChange(DataSnapshot dataSnapshot) {
                 owlmessageList = new ArrayList<>();
 
+                //save the current sendTo selection, if it exists.
+                String currentSendTo = "";
+                if (mSendToSpinner.getSelectedItemPosition() > 0) {
+                    currentSendTo = mSendToSpinner.getSelectedItem().toString();
+                }
+
+                usernamelist = new ArrayList<>();
+                usernameToIdMap = new HashMap<>();
+
                 for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                     Owlmessage owlmessage = postSnapshot.getValue(Owlmessage.class);
 
                     //if the current user is the owner of the item - show all the messages.
                     if (currUserId.equals(currentItem.ownerKey)) {
                         owlmessageList.add(owlmessage);
+
+                        //populate the SendTo spinner.
+                        if (!currUserId.equals(owlmessage.senderUserid)) {
+                            if (!usernamelist.contains(owlmessage.senderUsername)) {
+                                usernamelist.add(owlmessage.senderUsername);
+                                usernameToIdMap.put(owlmessage.senderUsername, owlmessage.senderUserid);
+                            }
+                        }
+
                     }
                     //otherwise, only show messages sent by or to the current user. OR if message sent by owner to owner (everyone)
                     else if ((currUserId.equals(owlmessage.senderUserid)) ||
@@ -206,12 +253,34 @@ public class ItemChatActivity extends AppCompatActivity implements FirebaseAuth.
                     }
                 }
 
+                if (currUserId.equals(currentItem.ownerKey)) {
+                    Collections.sort(usernamelist, new Comparator<String>() {
+                        @Override
+                        public int compare(String s1, String s2) {
+                            return s1.compareToIgnoreCase(s2);
+                        }
+                    });
+                    usernamelist.add(0, "Choose message recipient");        //by default, noone is selected.
+                    sendToAdapter = new ArrayAdapter<String>(getBaseContext(), android.R.layout.simple_spinner_item, usernamelist);
+                    sendToAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                    mSendToSpinner.setAdapter(sendToAdapter);
+
+                    //restore the current selection, if there was one:
+                    if (!currentSendTo.equals("")) {
+                        mSendToSpinner.setSelection(usernamelist.indexOf(currentSendTo));
+                    }
+                }
+
+
                 //Toast.makeText(getBaseContext(), "number of messages: " + owlmessageList.size(), Toast.LENGTH_SHORT).show();
 
                 // If there are no messages, show a view that invites the user to add a message.
                 mEmptyListMessage.setVisibility(owlmessageList.size() == 0 ? View.VISIBLE : View.GONE);
 
                 owlmessageAdapter.updateList(owlmessageList);
+
+                //scroll to bottom on new message
+                mRecyclerView.smoothScrollToPosition(owlmessageAdapter.getItemCount() - 1);
             }
 
             @Override
