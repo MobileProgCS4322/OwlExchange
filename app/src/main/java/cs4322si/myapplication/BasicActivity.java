@@ -61,10 +61,9 @@ public class BasicActivity extends AppCompatActivity implements FirebaseAuth.Aut
     private static final String TAG = "MainPage";
     private static final int SET_SEARCH_FILTER = 987;
     private boolean searchFilterOn = false;
-    int searchCat;
-    String searchText;
-    Date searchStartDate, searchEndDate;
-
+    private int searchCat;
+    private String searchText;
+    private Date searchStartDate, searchEndDate;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,10 +92,10 @@ public class BasicActivity extends AppCompatActivity implements FirebaseAuth.Aut
         myLayoutMgr.setStackFromEnd(true);
         mRecyclerView.setLayoutManager(myLayoutMgr);
 
-        FloatingActionButton fabMessaging = (FloatingActionButton) findViewById(R.id.fabMessaging);
-        FloatingActionButton fabAdd = (FloatingActionButton) findViewById(R.id.fabAdd);
-        FloatingActionButton fabHome = (FloatingActionButton) findViewById(R.id.fabHome);
-        fabSearch = (FloatingActionButton) findViewById(R.id.fabSearch);
+        FloatingActionButton fabMessaging = findViewById(R.id.fabMessaging);
+        FloatingActionButton fabAdd = findViewById(R.id.fabAdd);
+        FloatingActionButton fabHome = findViewById(R.id.fabHome);
+        fabSearch = findViewById(R.id.fabSearch);
 
         fabAdd.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -109,8 +108,8 @@ public class BasicActivity extends AppCompatActivity implements FirebaseAuth.Aut
         fabMessaging.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                Intent i = new Intent(getBaseContext(), MyActivity.class);
+                startActivity(i);
             }
         });
 
@@ -216,8 +215,6 @@ public class BasicActivity extends AppCompatActivity implements FirebaseAuth.Aut
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 //Toast.makeText(getBaseContext(), "calling onDataChange", Toast.LENGTH_SHORT).show();
-                mEmptyListMessage.setVisibility(!dataSnapshot.hasChildren() ? View.VISIBLE : View.GONE);
-
                 owlitemList = new ArrayList<>();
                 for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                     Owlitem item = postSnapshot.getValue(Owlitem.class);
@@ -271,6 +268,14 @@ public class BasicActivity extends AppCompatActivity implements FirebaseAuth.Aut
                 }
 
                 owlitemAdapter.updateList(owlitemList);
+                if (searchFilterOn) {
+                    mEmptyListMessage.setText(getResources().getString(R.string.no_search_results));
+                    mEmptyListMessage.setVisibility(owlitemList.isEmpty() ? View.VISIBLE : View.GONE);
+                }
+                else {
+                    mEmptyListMessage.setText(getResources().getString(R.string.no_items));
+                    mEmptyListMessage.setVisibility(!dataSnapshot.hasChildren() ? View.VISIBLE : View.GONE);
+                }
             }
 
             @Override

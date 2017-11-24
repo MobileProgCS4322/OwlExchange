@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="cs4322si.myapplication.MyActivity">
+
+    <TextView
+        android:id="@+id/tvUsername"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="16dp"
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp"
+        android:text="Logged in as"
+        android:textSize="18sp" />
+    <View
+        android:id="@+id/usernameDivider"
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="@color/material_gray_900" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:id="@+id/sellingTab"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/sellingLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="@string/Selling"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="@color/material_red_a200"
+                />
+
+            <View
+                android:id="@+id/sellingLine"
+                android:layout_width="match_parent"
+                android:layout_height="5dp"
+                android:background="@color/material_red_a200"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/buyingTab"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/buyingLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:textSize="20sp"
+                android:text="@string/Buying"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
+                />
+
+            <View
+                android:id="@+id/buyingLine"
+                android:layout_width="match_parent"
+                android:layout_height="5dp"
+                android:background="@color/material_red_a200"
+                android:visibility="invisible" />
+
+        </LinearLayout>
+    </LinearLayout>
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/itemsList"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:padding="16dp"
+        tools:listitem="@layout/item4sale"
+        />
+</LinearLayout>

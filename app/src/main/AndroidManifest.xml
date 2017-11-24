@@ -60,8 +60,14 @@
         <activity android:name=".ItemDetailActivity" />
         <activity
             android:name=".ItemChatActivity"
-            android:label="@string/title_activity_item_chat" />
-        <activity android:name=".SetSearchActivity"></activity>
+            android:label="@string/title_activity_item_chat"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".SetSearchActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".MyActivity"
+            android:screenOrientation="portrait" />
     </application>
 
 </manifest>
