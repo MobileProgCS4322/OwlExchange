@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="92dp"
+    android:orientation="vertical">
+    <!--            android:scaleType="fitEnd"
+                android:adjustViewBounds="true"
+                            android:cropToPadding="false"
+                -->
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:padding="4dp">
+
+        <!--<cs4322si.myapplication.ImageViewFullView-->
+        <!--android:background="@android:color/white"-->
+
+        <TextView
+            android:id="@+id/mTitle"
+            android:layout_width="240dp"
+            android:layout_height="18dp"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:gravity="start"
+            android:text="title"
+            android:textAlignment="textStart"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/mCategory"
+            android:layout_width="240dp"
+            android:layout_height="18dp"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_below="@+id/mTitle"
+            android:gravity="start"
+            android:text="category"
+            android:textAlignment="textStart"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/mDatePosted"
+            android:layout_width="240dp"
+            android:layout_height="18dp"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_below="@+id/mCategory"
+            android:gravity="start"
+            android:text="date posted"
+            android:textAlignment="textStart"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/mPostedBy"
+            android:layout_width="240dp"
+            android:layout_height="18dp"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_below="@+id/mDatePosted"
+            android:gravity="start"
+            android:text="posted by"
+            android:textAlignment="textStart"
+            android:textSize="14sp" />
+
+        <ImageView
+            android:id="@+id/mPicture"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:contentDescription="@string/imageofitem"
+            android:scaleType="fitEnd" />
+
+    </RelativeLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="4dp"
+        android:background="@color/colorAccent"
+        android:orientation="horizontal"></View>
+
+</LinearLayout>

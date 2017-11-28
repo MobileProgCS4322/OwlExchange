@@ -68,7 +68,7 @@
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:textSize="20sp"
-                android:text="@string/Buying"
+                android:text="@string/MyChats"
                 android:paddingTop="8dp"
                 android:paddingBottom="8dp"
                 />
@@ -84,11 +84,19 @@
     </LinearLayout>
 
     <android.support.v7.widget.RecyclerView
-        android:id="@+id/itemsList"
+        android:id="@+id/myItemsList"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:clipToPadding="false"
         android:padding="16dp"
-        tools:listitem="@layout/item4sale"
-        />
+        tools:listitem="@layout/myitem4salelayout" />
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/itemsInterestedInList"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:padding="16dp"
+        android:visibility="gone"
+        tools:listitem="@layout/myitem4salelayout" />
 </LinearLayout>

@@ -69,5 +69,4 @@
             android:name=".MyActivity"
             android:screenOrientation="portrait" />
     </application>
-
 </manifest>

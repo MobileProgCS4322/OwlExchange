@@ -30,6 +30,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.storage.FirebaseStorage;
 
 import java.util.ArrayList;
@@ -149,6 +150,8 @@ public class BasicActivity extends AppCompatActivity implements FirebaseAuth.Aut
             storage = FirebaseStorage.getInstance();
             attachRecyclerViewAdapter();
             FirebaseAuth.getInstance().addAuthStateListener(this);
+
+            FirebaseMessaging.getInstance().subscribeToTopic("user_"+FirebaseAuth.getInstance().getCurrentUser().getUid());
         }
         else {
             startActivity(new Intent(getBaseContext(), StartActivity.class));

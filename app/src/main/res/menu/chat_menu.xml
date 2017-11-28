@@ -1,0 +1,11 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="cs4322si.testapp.MyActivity">
+    <item
+        android:id="@+id/action_backToItem"
+        android:title="@string/action_backtoitem"
+        android:orderInCategory="100"
+        android:icon="@drawable/ic_arrow_back_black_24dp"
+        app:showAsAction="always" />
+</menu>

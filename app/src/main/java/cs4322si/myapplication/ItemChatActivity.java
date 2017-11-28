@@ -12,6 +12,8 @@ import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -122,6 +124,8 @@ public class ItemChatActivity extends AppCompatActivity implements FirebaseAuth.
                         mDatabase.child("users").child(currentItem.ownerKey).child("myMessageList").child(currentItem.itemId).setValue(true);
                         mDatabase.child("users").child(currUserId).child("myMessageList").child(currentItem.itemId).setValue(true);
                         mMessageEdit.setText("");
+
+                        sendNotificationToUser(newMsg.receiverUserid, "New Message from OwlExchange user " + newMsg.senderUsername + ": " + newMsg.message);
                     }
                 }
                 else {
@@ -274,13 +278,17 @@ public class ItemChatActivity extends AppCompatActivity implements FirebaseAuth.
 
                 //Toast.makeText(getBaseContext(), "number of messages: " + owlmessageList.size(), Toast.LENGTH_SHORT).show();
 
-                // If there are no messages, show a view that invites the user to add a message.
-                mEmptyListMessage.setVisibility(owlmessageList.size() == 0 ? View.VISIBLE : View.GONE);
-
                 owlmessageAdapter.updateList(owlmessageList);
 
-                //scroll to bottom on new message
-                mRecyclerView.smoothScrollToPosition(owlmessageAdapter.getItemCount() - 1);
+                if (owlmessageList.size() == 0) {
+                    // If there are no messages, show a view that invites the user to add a message.
+                    mEmptyListMessage.setVisibility(View.VISIBLE);
+                }
+                else {
+                    mEmptyListMessage.setVisibility(View.GONE);
+                    //scroll to bottom on new message
+                    mRecyclerView.smoothScrollToPosition(owlmessageAdapter.getItemCount() - 1);
+                }
             }
 
             @Override
@@ -350,6 +358,51 @@ public class ItemChatActivity extends AppCompatActivity implements FirebaseAuth.
     }*/
 
 
+    public static void sendNotificationToUser(String user, final String message) {
+        DatabaseReference notifications = FirebaseDatabase.getInstance().getReference().child("notificationRequests");
+
+        Map notification = new HashMap<>();
+        notification.put("username", user);
+        notification.put("message", message);
+
+        notifications.push().setValue(notification);
+    }
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.chat_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_backToItem) {
+            Intent i = new Intent(getBaseContext(), ItemDetailActivity.class);
+            i.putExtra("currentItem", (Parcelable) currentItem);
+            startActivity(i);
+            finish();
+            return true;
+        }
+        else if (id == R.id.action_signout) {
+            FirebaseAuth auth = FirebaseAuth.getInstance();
+            FirebaseUser user = auth.getCurrentUser();
+            if (user != null) {
+                auth.signOut();
+            }
+            //startActivity(new Intent(getBaseContext(), StartActivity.class));
+            //finish();
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
 
 
 }
