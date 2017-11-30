@@ -56,14 +56,14 @@
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/buyingTab"
+            android:id="@+id/soldTab"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:orientation="vertical">
 
             <TextView
-                android:id="@+id/buyingLabel"
+                android:id="@+id/soldLabel"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
@@ -74,7 +74,7 @@
                 />
 
             <View
-                android:id="@+id/buyingLine"
+                android:id="@+id/soldLine"
                 android:layout_width="match_parent"
                 android:layout_height="5dp"
                 android:background="@color/material_red_a200"
@@ -92,7 +92,7 @@
         tools:listitem="@layout/myitem4salelayout" />
 
     <android.support.v7.widget.RecyclerView
-        android:id="@+id/itemsInterestedInList"
+        android:id="@+id/soldItemsList"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:clipToPadding="false"

@@ -223,7 +223,9 @@ public class BasicActivity extends AppCompatActivity implements FirebaseAuth.Aut
                     Owlitem item = postSnapshot.getValue(Owlitem.class);
 
                     if (!searchFilterOn) {
-                        owlitemList.add(item);
+                        if (!item.traded && !item.deleted) {
+                            owlitemList.add(item);
+                        }
                     } else if ((searchStartDate != null) || (searchEndDate != null)) {
                         //filtered on date search
                         //need to check if there is a category search and a keyword search.
@@ -231,22 +233,30 @@ public class BasicActivity extends AppCompatActivity implements FirebaseAuth.Aut
                             if (searchText.length() != 0) {
                                 if (item.title.toLowerCase().contains(searchText) ||
                                         item.description.toLowerCase().contains(searchText)) {
-                                    owlitemList.add(item);
+                                    if (!item.traded && !item.deleted) {
+                                        owlitemList.add(item);
+                                    }
                                 }
                             } else {
-                                owlitemList.add(item);
+                                if (!item.traded && !item.deleted) {
+                                    owlitemList.add(item);
+                                }
                             }
                         } else {
                             //there is a category search
                             if (searchText.length() == 0) {     //no keyword search
                                 if (item.category.equals(categories.get(searchCat))) {
-                                    owlitemList.add(item);
+                                    if (!item.traded && !item.deleted) {
+                                        owlitemList.add(item);
+                                    }
                                 }
                             } else {                  //category AND keyword search
                                 if ((item.category.equals(categories.get(searchCat))) &&
                                         (item.title.toLowerCase().contains(searchText) ||
                                                 item.description.toLowerCase().contains(searchText))) {
-                                    owlitemList.add(item);
+                                    if (!item.traded && !item.deleted) {
+                                        owlitemList.add(item);
+                                    }
                                 }
                             }
                         }
@@ -256,16 +266,22 @@ public class BasicActivity extends AppCompatActivity implements FirebaseAuth.Aut
                         if (searchText.length() != 0) {
                             if (item.title.toLowerCase().contains(searchText) ||
                                     item.description.toLowerCase().contains(searchText)) {
-                                owlitemList.add(item);
+                                if (!item.traded && !item.deleted) {
+                                    owlitemList.add(item);
+                                }
                             }
                         } else {
-                            owlitemList.add(item);
+                            if (!item.traded && !item.deleted) {
+                                owlitemList.add(item);
+                            }
                         }
                     } else {
                         //no date, no category.  filter on keyword
                         if (item.title.toLowerCase().contains(searchText) ||
                                 item.description.toLowerCase().contains(searchText)) {
-                            owlitemList.add(item);
+                            if (!item.traded && !item.deleted) {
+                                owlitemList.add(item);
+                            }
                         }
                     }
                 }

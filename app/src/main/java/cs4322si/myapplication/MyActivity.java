@@ -38,9 +38,9 @@ public class MyActivity extends AppCompatActivity implements FirebaseAuth.AuthSt
 
     private TextView tvLoggedInAs;
 
-    private LinearLayout sellingTab, buyingTab;
-    private View sellingLine, buyingLine;
-    private TextView sellingLabel, buyingLabel;
+    private LinearLayout sellingTab, soldTab;
+    private View sellingLine, soldLine;
+    private TextView sellingLabel, soldLabel;
 
     private RecyclerView myItemsRecyclerView;
     private MyOwlitemAdapter owlitemAdapter;
@@ -50,12 +50,12 @@ public class MyActivity extends AppCompatActivity implements FirebaseAuth.AuthSt
     private ValueEventListener myQueryListener;
 
 
-    private RecyclerView interestedInRecyclerView;
-    private ItemsInterestedInAdapter interestedInAdapter;
-    private ArrayList<Owlitem> interestedInList = new ArrayList<>();
+    private RecyclerView soldItemsRecyclerView;
+    private MyOwlitemAdapter soldItemsAdapter;
+    private ArrayList<Owlitem> soldItemsList = new ArrayList<>();
 
-    private Query interestedInquery;
-    private ValueEventListener interestedInQueryListener;
+    private Query soldItemsQuery;
+    private ValueEventListener soldItemsQueryListener;
 
 
 
@@ -68,14 +68,14 @@ public class MyActivity extends AppCompatActivity implements FirebaseAuth.AuthSt
 
         tvLoggedInAs = findViewById(R.id.tvUsername);
         sellingTab = findViewById(R.id.sellingTab);
-        buyingTab = findViewById(R.id.buyingTab);
+        soldTab = findViewById(R.id.soldTab);
 
         sellingLine = findViewById(R.id.sellingLine);
-        buyingLine  = findViewById(R.id.buyingLine);
+        soldLine  = findViewById(R.id.soldLine);
 
 
         sellingLabel = findViewById(R.id.sellingLabel);
-        buyingLabel = findViewById(R.id.buyingLabel);
+        soldLabel = findViewById(R.id.soldLabel);
 
         myItemsRecyclerView = findViewById(R.id.myItemsList);
 
@@ -86,31 +86,33 @@ public class MyActivity extends AppCompatActivity implements FirebaseAuth.AuthSt
         myItemsRecyclerView.setLayoutManager(myLayoutMgr);
 
 
-        interestedInRecyclerView = findViewById(R.id.itemsInterestedInList);
+        soldItemsRecyclerView = findViewById(R.id.soldItemsList);
 
-        interestedInRecyclerView.setHasFixedSize(true);
-        LinearLayoutManager interestedInLayoutMgr = new LinearLayoutManager(this);
-        interestedInLayoutMgr.setReverseLayout(true);
-        interestedInLayoutMgr.setStackFromEnd(true);
-        interestedInRecyclerView.setLayoutManager(interestedInLayoutMgr);
+        soldItemsRecyclerView.setHasFixedSize(true);
+        LinearLayoutManager soldItemsLayoutMgr = new LinearLayoutManager(this);
+        soldItemsLayoutMgr.setReverseLayout(true);
+        soldItemsLayoutMgr.setStackFromEnd(true);
+        soldItemsRecyclerView.setLayoutManager(soldItemsLayoutMgr);
 
 
         sellingTab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                buyingLine.setVisibility(View.INVISIBLE);
-                buyingLabel.setTypeface(Typeface.SANS_SERIF); //only font style
-                buyingLabel.setTextColor(getResources().getColor(R.color.material_gray_900));
-                interestedInRecyclerView.setVisibility(View.GONE);
+                soldLine.setVisibility(View.INVISIBLE);
+                soldLabel.setTypeface(Typeface.SANS_SERIF); //only font style
+                soldLabel.setTextColor(getResources().getColor(R.color.material_gray_900));
+                soldItemsRecyclerView.setVisibility(View.GONE);
 
                 sellingLine.setVisibility(View.VISIBLE);
                 sellingLabel.setTypeface(null,Typeface.BOLD); //only text style(only bold)
                 sellingLabel.setTextColor(getResources().getColor(R.color.material_red_a200));
                 myItemsRecyclerView.setVisibility(View.VISIBLE);
+
+                //owlitemAdapter.notifyDataSetChanged();
             }
         });
 
-        buyingTab.setOnClickListener(new View.OnClickListener() {
+        soldTab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 sellingLine.setVisibility(View.INVISIBLE);
@@ -118,10 +120,12 @@ public class MyActivity extends AppCompatActivity implements FirebaseAuth.AuthSt
                 sellingLabel.setTextColor(getResources().getColor(R.color.material_gray_900));
                 myItemsRecyclerView.setVisibility(View.GONE);
 
-                buyingLine.setVisibility(View.VISIBLE);
-                buyingLabel.setTypeface(null,Typeface.BOLD); //only text style(only bold)
-                buyingLabel.setTextColor(getResources().getColor(R.color.material_red_a200));
-                interestedInRecyclerView.setVisibility(View.VISIBLE);
+                soldLine.setVisibility(View.VISIBLE);
+                soldLabel.setTypeface(null,Typeface.BOLD); //only text style(only bold)
+                soldLabel.setTextColor(getResources().getColor(R.color.material_red_a200));
+                soldItemsRecyclerView.setVisibility(View.VISIBLE);
+
+                //owlitemAdapter.notifyDataSetChanged();
             }
         });
 
@@ -155,7 +159,7 @@ public class MyActivity extends AppCompatActivity implements FirebaseAuth.AuthSt
             mDatabase.child("users").child(user.getUid()).addListenerForSingleValueEvent(userListener);
 
             attachRecyclerViewAdapter();
-            //attachInterestedInRecyclerViewAdapter();
+            attachSoldRecyclerViewAdapter();
         }
         else {
             startActivity(new Intent(getBaseContext(), StartActivity.class));
@@ -180,11 +184,11 @@ public class MyActivity extends AppCompatActivity implements FirebaseAuth.AuthSt
                 owlitemList = new ArrayList<>();
                 for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                     Owlitem item = postSnapshot.getValue(Owlitem.class);
-                    owlitemList.add(item);
+                    if (!item.traded && !item.deleted) {
+                        owlitemList.add(item);
+                    }
                 }
-
                 owlitemAdapter.updateList(owlitemList);
-
                 //mEmptyListMessage.setVisibility(!dataSnapshot.hasChildren() ? View.VISIBLE : View.GONE);
             }
 
@@ -197,6 +201,42 @@ public class MyActivity extends AppCompatActivity implements FirebaseAuth.AuthSt
         });
     }
 
+    private void attachSoldRecyclerViewAdapter() {
+
+        if (soldItemsQuery != null) {
+            soldItemsQuery.removeEventListener(soldItemsQueryListener);
+        }
+        soldItemsQuery = mDatabase.child("items").orderByChild("ownerKey").equalTo(FirebaseAuth.getInstance().getCurrentUser().getUid());
+        soldItemsAdapter = new MyOwlitemAdapter(soldItemsList);
+        soldItemsRecyclerView.setAdapter(soldItemsAdapter);
+
+        soldItemsQueryListener = soldItemsQuery.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                //Toast.makeText(getBaseContext(), "calling onDataChange", Toast.LENGTH_SHORT).show();
+                soldItemsList = new ArrayList<>();
+                for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                    Owlitem item = postSnapshot.getValue(Owlitem.class);
+
+                    if (item.traded && !item.deleted) {
+                        soldItemsList.add(item);
+                    }
+                }
+                soldItemsAdapter.updateList(soldItemsList);
+                //mEmptyListMessage.setVisibility(!dataSnapshot.hasChildren() ? View.VISIBLE : View.GONE);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                // Getting Post failed, log a message
+                Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
+                // ...
+            }
+        });
+    }
+
+
+/*
 
     private void attachInterestedInRecyclerViewAdapter() {
 
@@ -252,6 +292,7 @@ public class MyActivity extends AppCompatActivity implements FirebaseAuth.AuthSt
         });
     }
 
+*/
 
 
     @Override

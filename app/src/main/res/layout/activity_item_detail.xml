@@ -137,4 +137,26 @@
         app:srcCompat="@drawable/ic_arrow_back_black_24dp"
         tools:layout_constraintBottom_creator="1"
         tools:layout_constraintLeft_creator="1" />
+
+    <CheckBox
+        android:id="@+id/cbSold"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginStart="8dp"
+        android:text="Sold?"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <CheckBox
+        android:id="@+id/cbDelete"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginLeft="36dp"
+        android:layout_marginStart="36dp"
+        android:text="Delete?"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/cbSold" />
 </android.support.constraint.ConstraintLayout>

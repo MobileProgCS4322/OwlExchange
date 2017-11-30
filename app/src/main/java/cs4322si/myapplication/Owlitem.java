@@ -34,6 +34,8 @@ public class Owlitem implements Parcelable{
     public String imageLoc; //address of image in firebase storage.
 
     public boolean traded = false;  //sold yet?
+    public boolean deleted = false;
+
 
     public Owlitem() {}
 
@@ -61,6 +63,7 @@ public class Owlitem implements Parcelable{
         result.put("datePosted", datePosted);
         result.put("imageLoc", imageLoc);
         result.put("traded", traded);
+        result.put("deleted", deleted);
         return result;
     }
 
@@ -75,6 +78,8 @@ public class Owlitem implements Parcelable{
         this.description =  in.readString();
         this.datePosted =  in.readLong();
         this.imageLoc =  in.readString();
+        this.traded = in.readInt() != 0;
+        this.deleted = in.readInt() != 0;
     }
 
     @Exclude
@@ -94,6 +99,8 @@ public class Owlitem implements Parcelable{
         dest.writeString(this.description);
         dest.writeLong(this.datePosted);
         dest.writeString(this.imageLoc);
+        dest.writeInt((int) (this.traded ? 1 : 0));
+        dest.writeInt((int) (this.deleted ? 1 : 0));
     }
 
     @Exclude
